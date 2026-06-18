@@ -1415,6 +1415,41 @@ export default function ProLevelPage() {
     }
   };
 
+  // Remove titles from the `titlesText` input that have already been successfully generated
+  const handleRemoveSuccessfulTitles = () => {
+    try {
+      if (!titlesText || titlesText.trim().length === 0) return flashStatus('No titles to process.', 1600, 'info');
+      const successSet = new Set(
+        items.filter((it) => it.status === 'success').flatMap((it) => [String(it.sourceTitle || it.title || '').trim().toLowerCase(), String(it.title || it.sourceTitle || '').trim().toLowerCase()])
+      );
+
+      const entries: string[] = [];
+      titlesText.split(/\r?\n/).forEach((line) => {
+        line.split(',').forEach((part) => {
+          const trimmed = (part || '').trim();
+          if (!trimmed) return;
+          entries.push(trimmed);
+        });
+      });
+
+      const remaining = entries.filter((entry) => {
+        let title = entry;
+        if (entry.includes('||')) title = entry.split('||')[0].trim();
+        else if (entry.includes('|')) title = entry.split('|')[0].trim();
+        return !successSet.has(title.toLowerCase());
+      });
+
+      const removed = entries.length - remaining.length;
+      if (removed <= 0) return flashStatus('No matching successful titles found to remove.', 1800, 'info');
+      const nextText = remaining.join('\n');
+      setTitlesText(nextText);
+      flashStatus(`${removed} successful title(s) removed from input.`, 2000, 'success');
+    } catch (e) {
+      logError('Failed to remove successful titles', e);
+      flashStatus('Failed to remove successful titles.', 2000, 'error');
+    }
+  };
+
   // ---------------------------------------------------------------------
   // Batch PDF download
   // ---------------------------------------------------------------------
@@ -1981,9 +2016,20 @@ export default function ProLevelPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                Multiple Title Ideas (split by commas or lines)
-              </label>
+              <div className="flex items-start justify-between">
+                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  Multiple Title Ideas (split by commas or lines)
+                </label>
+                <button
+                  type="button"
+                  onClick={handleRemoveSuccessfulTitles}
+                  disabled={isLoading || items.filter((it) => it.status === 'success').length === 0}
+                  title="Remove titles that were successfully generated"
+                  className="ml-3 text-xs px-3 py-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 rounded-2xl font-bold text-black"
+                >
+                  Remove Successful Titles
+                </button>
+              </div>
               <textarea
                 value={titlesText}
                 onChange={(e) => setTitlesText(e.target.value)}
@@ -2215,7 +2261,6 @@ export default function ProLevelPage() {
                     <span className="text-[10px] font-bold">Parallel Generation</span>
                   </label>
                 </div>
-
                 <button
                   type="button"
                   onClick={handleClearInputs}
@@ -2225,6 +2270,8 @@ export default function ProLevelPage() {
                 >
                   <FileText size={14} />
                 </button>
+
+                
 
                 <button
                   type="button"
@@ -2257,17 +2304,15 @@ export default function ProLevelPage() {
             <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto custom-scrollbar">
               {items.map((itm, idx) => {
                 const isActive = idx === activeIndex;
-                let statusColor = 'decoration-zinc-500';
+                // Title text color: highlighted when active, neutral otherwise
+                const statusColor = isActive ? 'text-zinc-100' : 'text-zinc-400';
+                // Dot indicates per-item status regardless of active selection
                 let indicatorDot = 'bg-zinc-500';
-
                 if (itm.status === 'success') {
-                  statusColor = 'decoration-emerald-500 underline underline-offset-4 decoration-2';
                   indicatorDot = 'bg-emerald-500';
                 } else if (itm.status === 'error') {
-                  statusColor = 'decoration-red-500 underline underline-offset-4 decoration-2';
                   indicatorDot = 'bg-red-500';
                 } else if (itm.status === 'pending') {
-                  statusColor = 'decoration-sky-400 animate-pulse underline underline-offset-4 decoration-2';
                   indicatorDot = 'bg-sky-400 animate-ping';
                 }
 
@@ -2327,10 +2372,10 @@ export default function ProLevelPage() {
             } bg-[#121214] border border-[#27272a] rounded-3xl p-5 md:p-6 flex flex-col gap-4 transition-all duration-300`}
           >
             {activeItem ? (
-              <div className="flex flex-col gap-4 h-full">
+                <div className="flex flex-col gap-4">
 
 
-                  <div className="flex-1 flex flex-col gap-4 h-full">
+                  <div className="flex-1 flex flex-col gap-4">
                   {/* Document title and header (spans both editor and output) */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 flex flex-col gap-1">
@@ -2347,9 +2392,9 @@ export default function ProLevelPage() {
                   </div>
 
                   {/* Editor + Output container: stacks on small, side-by-side on md+ */}
-                  <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0">
+                  <div className="flex flex-col md:flex-row gap-4">
                     {/* Editor column */}
-                    <div className="flex-1 min-h-0 flex flex-col">
+                    <div className="flex flex-col">
                       <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
                           <span style={{ color: ACTIVE_COLOR }} className="text-[10px] font-black uppercase tracking-widest">
                           Document Body
@@ -2432,7 +2477,7 @@ export default function ProLevelPage() {
                         <textarea
                           value={activeItem.content}
                           onChange={(e) => handleUpdateItemContent(e.target.value)}
-                          className="w-full flex-1 min-h-0 rounded-2xl bg-black/40 border border-white/5 p-4 text-xs font-mono text-white outline-none focus:border-white/20 leading-relaxed resize-none focus:ring-0 custom-scrollbar"
+                          className="w-full rounded-2xl bg-black/40 border border-white/5 p-4 text-xs font-mono text-white outline-none focus:border-white/20 leading-relaxed"
                         />
                       ) : (
                         <div
@@ -2443,7 +2488,8 @@ export default function ProLevelPage() {
                             const html = (e.currentTarget as HTMLDivElement).innerHTML;
                             handleUpdateItemContent(html);
                           }}
-                          className="w-full flex-1 min-h-0 rounded-2xl bg-black/40 border border-white/5 p-4 text-sm text-zinc-100 outline-none focus:border-white/20 leading-relaxed overflow-y-auto custom-scrollbar prose-visual-editor text-left"
+                          className="w-full rounded-2xl bg-black/40 border border-white/5 p-4 text-sm text-zinc-100 outline-none focus:border-white/20 leading-relaxed prose-visual-editor text-left"
+                          style={{ overflow: 'visible' }}
                           dangerouslySetInnerHTML={{ __html: activeItem.content }}
                         />
                       )}
