@@ -142,7 +142,12 @@ export default function ProLevelPage() {
                 const copy = { ...it } as ProcessedItem;
                 const raw = String(copy.errorMsg ?? copy.content ?? '').trim();
                 const looksHuge = raw.length > 1500 || /^\s*[\[{]/.test(raw);
-                if (copy.status === 'error' || looksHuge) {
+                // Only collapse content when the item actually indicates an error.
+                // Previously very large generated payloads were treated as errors
+                // and replaced with a short summary. For Pro Level we want to show
+                // the full generated content by default, so only convert to the
+                // compact error view when the item explicitly has an error status.
+                if (copy.status === 'error') {
                   // Try to extract a concise message from JSON-like payloads
                   let msg = raw;
                   try {
@@ -535,11 +540,10 @@ export default function ProLevelPage() {
       if (isAddEnabled) finalContent = applyAddOperation(finalContent, addSettings);
       if (isReplaceEnabled) finalContent = applyReplaceOperation(finalContent, replaceSettings);
 
-      // Store full generated HTML separately and write only an excerpt into the
-      // content slot so the editor isn't overwhelmed. The user can apply the
-      // full generated content later using the UI control.
-      const excerpt = getExcerptFromHtml(finalContent);
-      updateItemAtomic(activeIndex, { title: finalTitle, generatedContent: finalContent, content: excerpt, status: 'success' });
+      // Store full generated HTML and display it directly in the content
+      // slot so the Pro Level content section shows the complete generated
+      // output rather than a truncated excerpt.
+      updateItemAtomic(activeIndex, { title: finalTitle, generatedContent: finalContent, content: finalContent, status: 'success' });
 
       // decrement limit when using server default key
       if (!hasUserKey) {
@@ -1111,8 +1115,8 @@ export default function ProLevelPage() {
           if (isAddEnabled) finalContent = applyAddOperation(finalContent, addSettings);
           if (isReplaceEnabled) finalContent = applyReplaceOperation(finalContent, replaceSettings);
 
-          const excerpt = getExcerptFromHtml(finalContent);
-          updateItemAtomic(idx, { title: finalTitle, generatedContent: finalContent, content: excerpt, status: 'success' });
+          // Show full generated HTML in the Pro Level content area by default.
+          updateItemAtomic(idx, { title: finalTitle, generatedContent: finalContent, content: finalContent, status: 'success' });
           successfulRequests++;
           success = true;
         } catch (err) {
@@ -1241,8 +1245,8 @@ export default function ProLevelPage() {
 
           if (persistedIsAddEnabled) finalContent = applyAddOperation(finalContent, persistedAddSettings);
           if (persistedIsReplaceEnabled) finalContent = applyReplaceOperation(finalContent, persistedReplaceSettings);
-          const excerpt = getExcerptFromHtml(finalContent);
-          updateItemAtomic(idx, { title: finalTitle, generatedContent: finalContent, content: excerpt, status: 'success' });
+          // Show full generated HTML in the Pro Level content area by default.
+          updateItemAtomic(idx, { title: finalTitle, generatedContent: finalContent, content: finalContent, status: 'success' });
           successfulRequests++;
           success = true;
         } catch (err) {
