@@ -2,11 +2,13 @@
     "name":  "prolevel-app-root",
     "version":  "1.0.0",
     "private":  true,
-    "scripts":  {
-                    "dev":  "npm run dev --prefix prolevel-app",
-                    "build":  "npm run build --prefix prolevel-app",
-                    "start":  "npm run start --prefix prolevel-app"
-                },
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "test": "vitest"
+    },
     "dependencies":  {
                          "react-dom":  "^18.3.0",
                          "tailwind-merge":  "^2.3.0",
