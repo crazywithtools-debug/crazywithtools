@@ -701,14 +701,14 @@ export default function ProLevelPage() {
     setItems(updatedItems);
     localStorage.setItem('pro_level_items', JSON.stringify(updatedItems));
 
-    // Best-effort sync to MongoDB (non-blocking, ignores failures)
+    // Best-effort sync to optional persistent history (non-blocking, ignores failures)
     if (sessionId) {
       fetch('/api/history', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, items: updatedItems, customPrompt }),
       }).catch(() => {
-        /* offline / db not configured - ignore */
+        /* offline / persistent store not configured - ignore */
       });
     }
   };
@@ -880,7 +880,7 @@ export default function ProLevelPage() {
       const merged = { ...existing, ...newItem } as ProcessedItem;
       copy[idx] = merged;
       try { localStorage.setItem('pro_level_items', JSON.stringify(copy)); } catch (e) { /* ignore */ }
-      // Best-effort sync to MongoDB (non-blocking)
+      // Best-effort sync to optional persistent history (non-blocking)
       if (sessionId) {
         fetch('/api/history', {
           method: 'POST',

@@ -35,7 +35,7 @@ export default function PrivacyPage() {
         <ul>
           <li><strong>Google Gemini API:</strong> For AI content generation. Data sent to this service is subject to Google's Privacy Policy. Do not send sensitive personal information.</li>
           <li><strong>Google AdSense:</strong> We use Google AdSense to display advertisements. Google may collect and use data about your visits per their Privacy Policy.</li>
-          <li><strong>MongoDB:</strong> Optional backend storage for data synchronization (if enabled).</li>
+          <li><strong>In-memory history:</strong> The app stores session history in-memory by default. You may configure persistent storage separately if desired.</li>
         </ul>
         <p>Review each service's privacy policy before using features that interact with them.</p>
 
