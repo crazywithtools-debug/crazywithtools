@@ -1633,8 +1633,13 @@ export default function ProLevelPage() {
       // Helper to escape title text for safe insertion into HTML
       const esc = (s: string | undefined) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-      // Prepare content - use generated content if available
+      // Prepare content - prefer the editor's live content for the active
+      // item so that any inserted keys or manual edits are reflected in the
+      // downloaded PDF. Fall back to stored/generated content otherwise.
       let htmlContent = itm.generatedContent || itm.content || '';
+      if (idx === activeIndex && !isHtmlMode && editorRef.current) {
+        htmlContent = (editorRef.current.innerHTML as string) || htmlContent;
+      }
       
       // If this item failed to generate, produce a concise error PDF
       if (itm.status === 'error' || itm.errorMsg) {
@@ -1834,12 +1839,13 @@ export default function ProLevelPage() {
   const handleCopyActive = async () => {
     if (!activeItem) return flashStatus('No active item to copy.', 1600, 'info');
     try {
-      // Prefer the full generated HTML if present, otherwise use the current
-      // editor value (visual) or the source HTML (raw mode).
-      let rawHtml = activeItem.generatedContent || activeItem.content || '';
-      if (!activeItem.generatedContent) {
-        if (!isHtmlMode) rawHtml = (editorRef.current?.innerHTML as string) || rawHtml;
-        else rawHtml = activeItem.content || rawHtml;
+      // Prefer the editor's current content (what the user sees/edited).
+      // Fall back to the stored `content` or `generatedContent` otherwise.
+      let rawHtml = '';
+      if (!isHtmlMode && editorRef.current) {
+        rawHtml = (editorRef.current.innerHTML as string) || activeItem.content || activeItem.generatedContent || '';
+      } else {
+        rawHtml = activeItem.content || activeItem.generatedContent || '';
       }
 
       // Ensure proper HTML formatting with line breaks and structure
