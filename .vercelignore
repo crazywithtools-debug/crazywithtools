@@ -1,4 +1,36 @@
-prolevel-app/.next
-prolevel-app/node_modules
-prolevel-app/.vercel
-prolevel-app/package-lock.json
+# Version control
+.git
+.gitignore
+
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+.vitest
+coverage
+.nyc_output
+
+# Production
+.next
+out
+dist
+build
+
+# Misc
+.DS_Store
+*.pem
+*.env*
+!.env.local.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Documentation (kept in repo for reference but not needed in production)
+*.md
+!README.md
