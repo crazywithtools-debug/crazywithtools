@@ -16,7 +16,7 @@ const PROJECTS = [
     link: 'https://crazy-work.netlify.app/',
     source: '#',
     tech: ['React', 'Next.js', 'Gemini API'],
-    year: '2024',
+    year: '2025',
   },
   {
     title: 'XCrazy Editor',
@@ -24,7 +24,7 @@ const PROJECTS = [
     link: 'https://xcrazy.netlify.app/',
     source: '#',
     tech: ['Next.js', 'TypeScript', 'Gemini API'],
-    year: '2024',
+    year: '2026',
   },
 ] as const;
 
@@ -70,7 +70,7 @@ export default function AboutPage() {
                   </div>
 
                   <div className="mt-6 flex flex-wrap gap-2">
-                    {['React', 'Next.js', 'TypeScript', 'Tailwind', 'Node', 'MongoDB'].map((tag) => (
+                    {['React', 'Next.js', 'TypeScript', 'Tailwind', 'Node', 'In-memory history'].map((tag) => (
                       <span key={tag} className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 text-sm rounded-full text-slate-100"> <Code size={14} /> {tag}</span>
                     ))}
                   </div>
@@ -151,7 +151,7 @@ export default function AboutPage() {
             <div className="rounded-xl border border-white/6 bg-white/3 p-4">
               <p className="text-xs text-cyan-300 uppercase tracking-widest mb-3">Skills</p>
               <div className="flex flex-wrap gap-2">
-                {['React', 'Next.js', 'TypeScript', 'Tailwind', 'Node', 'MongoDB', 'Docker'].map((s) => (
+                {['React', 'Next.js', 'TypeScript', 'Tailwind', 'Node', 'In-memory history', 'Docker'].map((s) => (
                   <span key={s} className="px-3 py-1 rounded-full bg-white/5 text-sm text-slate-100">{s}</span>
                 ))}
               </div>

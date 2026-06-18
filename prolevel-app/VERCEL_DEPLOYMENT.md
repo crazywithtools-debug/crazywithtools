@@ -62,9 +62,8 @@ In Vercel Dashboard → Project Settings → Environment Variables:
 | Variable | Value | Scope |
 |----------|-------|-------|
 | `NEXT_PUBLIC_GENAI_API_KEY` | Your Gemini API key | Production, Preview, Development |
-| `NEXT_PUBLIC_MONGODB_URI` | MongoDB connection string | Production, Preview, Development |
-| `MONGODB_URI` | MongoDB connection string | Production, Preview, Development |
-| `MONGODB_DB_NAME` | `prolevel` | Production, Preview, Development |
+| `GENAI_API_KEY` | Your Gemini API key (optional server-side) | Production, Preview, Development |
+| `GEMINI_API_KEY` | Your Gemini API key (preferred server-side) | Production, Preview, Development |
 
 ### 4. Deploy
 
@@ -82,14 +81,12 @@ NEXT_PUBLIC_GENAI_API_KEY=<your-gemini-api-key>
 
 ### Optional (for history sync)
 ```
-NEXT_PUBLIC_MONGODB_URI=<mongodb-connection-string>
-MONGODB_URI=<mongodb-connection-string>
-MONGODB_DB_NAME=prolevel
+# The app uses an in-memory history store by default. If you add a persistent
+# database later, set your provider's connection string and database name here.
 ```
 
 **Getting API Keys:**
 - **Gemini API**: https://ai.google.dev/ → Get API Key
-- **MongoDB**: https://www.mongodb.com/cloud/atlas → Create cluster
 
 ## Project Structure (Production)
 
@@ -124,7 +121,7 @@ MONGODB_DB_NAME=prolevel
 - 📄 **PDF Export**: jsPDF with html2canvas
 - 🎨 **3-Column Layout**: Responsive design (20%-60%-20%)
 - 📱 **Mobile Responsive**: Adapts to all screen sizes
-- 🔄 **Content History**: Optional MongoDB integration
+- 🔄 **Content History**: In-memory by default (no DB required)
 - ⚡ **Fast Performance**: Next.js 16 with Turbopack
 - 🎯 **SEO Optimized**: Static pages for better indexing
 
@@ -166,12 +163,11 @@ MONGODB_DB_NAME=prolevel
 - API key has proper permissions
 - Rate limits not exceeded
 
-### MongoDB Errors
-**If history sync fails:**
-- MongoDB is optional - app works without it
-- Check `MONGODB_URI` connection string
-- Ensure MongoDB cluster is running
-- Verify IP allowlist includes Vercel IPs
+### History sync / Database Issues
+**If history sync or a future DB integration fails:**
+- The app works without a database using an in-memory history store by default.
+- If you add a persistent database later, check the provider connection string and network/firewall settings.
+- Verify any provider-specific allowlists and credentials.
 
 ### Deployment Rollback
 ```bash
@@ -197,7 +193,7 @@ vercel rollback  # Rollback to previous deployment
 - **Vercel Docs**: https://vercel.com/docs
 - **Next.js Docs**: https://nextjs.org/docs
 - **Gemini API**: https://ai.google.dev/docs
-- **MongoDB Atlas**: https://www.mongodb.com/docs/atlas/
+-- **(Optional) Database Provider**: Refer to your chosen DB provider docs if you add persistent history
 
 ## Security Notes
 
@@ -207,11 +203,12 @@ vercel rollback  # Rollback to previous deployment
 4. **Use HTTPS** - All Vercel deployments auto-HTTPS
 5. **Limit API access** - Restrict Gemini API to your domain
 
+
 ## Cost Optimization
 
 - **Vercel**: Free tier includes 100GB bandwidth/month, 12 function executions/second
 - **Gemini API**: Free tier available, upgrade as needed
-- **MongoDB**: Free tier (512MB) available, upgrade for production
+- **Optional DB**: If you add a persistent database (e.g., MongoDB), review provider pricing for production use
 
 ## Next Steps
 
