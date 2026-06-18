@@ -1,0 +1,10 @@
+{
+  "name": "prolevel-app-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix prolevel-app",
+    "build": "npm run build --prefix prolevel-app",
+    "start": "npm run start --prefix prolevel-app"
+  }
+}

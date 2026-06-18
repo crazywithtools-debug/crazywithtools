@@ -1,0 +1,35 @@
+{
+  "name": "CRAZY - Content Text Editor",
+  "short_name": "CRAZY",
+  "description": "A powerful text editor for content transformation with AI support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Go to home page",
+      "url": "/?mode=home",
+      "icons": []
+    },
+    {
+      "name": "Customize",
+      "short_name": "Customize",
+      "description": "Go to customize page",
+      "url": "/customize?mode=customize",
+      "icons": []
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+# ads.txt for Crazy With Tools
+# This file authorizes ad networks to sell inventory on this site.
+# Replace pub-0000000000000000 with your actual Google AdSense publisher ID.
+# Get your Publisher ID from: https://support.google.com/adsense/answer/7666014
+#
+# Format: <ad system domain>, <publisher id>, <relationship>, <cert authority id>
+# Relationship: DIRECT (you authorized this network directly), RESELLER (network is authorized by another party)
+
+# Google AdSense (Direct)
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+
+# If using other ad networks, add them below in the same format.
+# Examples:
+# appnexus.com, 12345, DIRECT
+# rubicon.com, 9999, DIRECT
+
+# NOTE: Using placeholder pub-0000000000000000. Replace with your actual Publisher ID to enable ads.

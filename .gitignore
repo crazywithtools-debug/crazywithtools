@@ -1,0 +1,36 @@
+# Node
+node_modules/
+**/node_modules/
+
+# Next.js
+.next/
+prolevel-app/.next/
+
+# Environment
+.env
+.env.*
+prolevel-app/.env*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# IDEs
+.vscode/
+.idea/
+
+# Bun
+bun.lock
+
+# Build
+dist/
+
+# Misc
+*.local

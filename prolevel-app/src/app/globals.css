@@ -1,0 +1,471 @@
+/* stylelint-disable at-rule-no-unknown */
+@import './home-layout.css';
+@import './home-ui.css';
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --bg-color: #09090b;
+  --bg-image: url('/crazybgimage.png');
+  --text-color: #ffffff;
+  --active-color: #10B981;
+  --button-bg-color: var(--active-color);
+  --button-text-color: #000000;
+  --theme-color: #ffffff;
+  
+  /* Responsive typography */
+  --font-size-xs: clamp(0.75rem, 1vw + 0.5rem, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 1.2vw + 0.6rem, 1rem);
+  --font-size-base: clamp(1rem, 1.5vw + 0.7rem, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 2vw + 0.8rem, 1.375rem);
+  --font-size-xl: clamp(1.25rem, 2.5vw + 0.9rem, 1.875rem);
+  --font-size-2xl: clamp(1.5rem, 3vw + 1rem, 2.25rem);
+  --font-size-3xl: clamp(1.875rem, 4vw + 1.2rem, 2.75rem);
+  
+  /* Responsive spacing */
+  --spacing-xs: clamp(0.25rem, 0.5vw, 0.5rem);
+  --spacing-sm: clamp(0.5rem, 1vw, 1rem);
+  --spacing-md: clamp(1rem, 2vw, 1.5rem);
+  --spacing-lg: clamp(1.5rem, 3vw, 2rem);
+  --spacing-xl: clamp(2rem, 4vw, 3rem);
+  
+  /* Touch-friendly target size */
+  --touch-target: 44px;
+}
+
+.font-poppins {
+  font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Print styles for PDF saving */
+@media print {
+  @page {
+    margin: 9mm 9mm;
+    size: A4;
+  }
+
+  @page :first {
+    margin-top: -45px;
+  }
+
+  /* Hide everything except the print-only content */
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-only {
+    display: block !important;
+    visibility: visible !important;
+    color: #000 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+    font-size: 12pt !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    word-break: normal !important;
+    white-space: normal !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+    page-break-before: auto;
+    page-break-after: auto;
+    page-break-inside: auto;
+  }
+
+  .print-only, .print-only * {
+    visibility: visible !important;
+    color: #000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+  }
+
+  .print-only p,
+  .print-only h1,
+  .print-only h2,
+  .print-only h3,
+  .print-only h4,
+  .print-only h5,
+  .print-only h6,
+  .print-only ul,
+  .print-only ol,
+  .print-only li,
+  .print-only blockquote,
+  .print-only strong,
+  .print-only em,
+  .print-only a {
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  .print-only ul,
+  .print-only ol {
+    list-style-position: outside !important;
+    margin-left: 1.2em !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Responsive font sizing for better mobile readability */
+    font-size: clamp(14px, 1.2vw + 12px, 18px);
+    /* scroll-behavior: smooth; - managed via data-scroll-behavior attribute in HTML */
+  }
+
+  html, body {
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--bg-color);
+    background-image: var(--bg-image), linear-gradient(90deg, #0f172a, #111827);
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll;
+    color: var(--theme-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* User-entered content: inputs, textareas and contenteditable regions */
+  .prose-visual-editor,
+  [contenteditable="true"],
+  textarea,
+  input,
+  .user-text {
+    color: var(--text-color) !important;
+  }
+
+  @media (min-width: 1024px) {
+    html, body {
+      background-attachment: fixed;
+    }
+  }
+}
+
+.homecss {
+  width: 100%;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: clamp(8px, 3vw, 24px);
+  gap: clamp(12px, 2vw, 24px);
+}
+
+@media (min-width: 768px) {
+  .homecss {
+    min-height: 600px;
+    padding: clamp(16px, 3vw, 32px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .homecss {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.left {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+  border-radius: clamp(12px, 2vw, 24px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+}
+
+@media (min-width: 768px) {
+  .left {
+    min-height: 600px;
+    height: auto;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .left {
+    width: 15%;
+  }
+}
+
+.center {
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+  border-radius: clamp(12px, 2vw, 24px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+}
+
+@media (min-width: 768px) {
+  .center {
+    min-height: 600px;
+    height: auto;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .center {
+    width: 55%;
+  }
+}
+
+.right {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+  border-radius: clamp(12px, 2vw, 24px);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+}
+
+@media (min-width: 768px) {
+  .right {
+    min-height: 600px;
+    height: auto;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .right {
+    width: 25%;
+  }
+}
+
+/* Panel helpers to ensure flex children can scroll without causing parent overflow */
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-width: 100%;
+}
+
+.panel-inner {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Animated blink/glow headline */
+@keyframes blinkGlow {
+  0%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 16px rgba(56,189,248,0.85), 0 0 32px rgba(59,130,246,0.5), 0 8px 40px rgba(15,23,42,0.25);
+  }
+  45% {
+    opacity: 0.82;
+    text-shadow: 0 0 10px rgba(56,189,248,0.65), 0 0 20px rgba(99,102,241,0.35);
+  }
+  65% {
+    opacity: 0.94;
+    text-shadow: 0 0 20px rgba(56,189,248,0.9), 0 0 40px rgba(59,130,246,0.55);
+  }
+}
+
+.blink-title {
+  animation: blinkGlow 1.6s ease-in-out infinite;
+  background: linear-gradient(90deg, #38bdf8, #818cf8, #0ea5e9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.blink-glow-button {
+  animation: blinkGlow 1.6s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.prose h2 {
+  @apply text-2xl font-black tracking-tight mb-4 mt-4;
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+}
+
+.prose ul {
+  @apply list-disc ml-6 mb-4;
+}
+
+.prose ol {
+  @apply list-decimal ml-6 mb-4;
+}
+
+/* Visual editor styles */
+.prose-visual-editor {
+  font-family: system-ui, -apple-system, sans-serif;
+  /* Brighter editor text for improved readability */
+  color: var(--text-color);
+}
+.prose-visual-editor h1,
+.prose-visual-editor h2,
+.prose-visual-editor h3 {
+  color: #ffffff;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  text-transform: none;
+}
+.prose-visual-editor h1 { font-size: 1.4rem; }
+.prose-visual-editor h2 { font-size: 1.2rem; }
+.prose-visual-editor h3 { font-size: 1.05rem; }
+.prose-visual-editor p { margin-bottom: 0.75rem; line-height: 1.6; }
+.prose-visual-editor ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+.prose-visual-editor ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+.prose-visual-editor li { margin-bottom: 0.25rem; }
+.prose-visual-editor strong { color: var(--text-color); font-weight: 600; }
+.prose-visual-editor a { color: var(--text-color); text-decoration: underline; }
+
+/* Avoid forcing a site-wide !important text color so Customize-managed
+   variables can control which text is static vs user content. */
+
+/* Responsive base typography and form controls (improves mobile readability) */
+:root {
+  --site-max-width: 1400px;
+}
+
+/* Provide a lightweight site container class for non-Tailwind elements */
+.site-container {
+  width: 100%;
+  max-width: var(--site-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(0.5rem, 2vw, 2rem);
+  padding-right: clamp(0.5rem, 2vw, 2rem);
+}
+
+/* Form controls and buttons: consistent, touch-friendly sizing */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  color: inherit;
+}
+
+input,
+textarea,
+select {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.75rem, 1.5vw, 1rem);
+  border-radius: 0.75rem;
+  outline: none;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 80ms ease;
+  /* Touch-friendly minimum height */
+  min-height: 44px;
+}
+
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.12);
+}
+
+button {
+  padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
+  border-radius: 0.75rem;
+  background: var(--button-bg-color, #10B981);
+  color: var(--button-text-color, #000000);
+  border: none;
+  cursor: pointer;
+  transition: transform 90ms ease, box-shadow 160ms ease, filter 120ms ease;
+  /* Touch-friendly minimum size */
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+}
+
+button:active { transform: translateY(1px) scale(0.998); }
+button:focus { box-shadow: 0 6px 18px rgba(2,6,23,0.6); }
+
+/* Utility: stack columns on small screens when necessary */
+.stack-sm { 
+  display: flex; 
+  gap: clamp(0.5rem, 1vw, 1.5rem);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) { 
+  .stack-sm { 
+    flex-direction: column; 
+  } 
+}
+

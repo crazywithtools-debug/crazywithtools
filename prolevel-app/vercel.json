@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm ci",
+  "framework": "nextjs",
+  "nodeVersion": "20.x",
+  "env": {
+    "NEXT_PUBLIC_MONGODB_URI": "@mongodb_uri",
+    "MONGODB_URI": "@mongodb_uri",
+    "NEXT_PUBLIC_GENAI_API_KEY": "@genai_api_key"
+  }
+}
