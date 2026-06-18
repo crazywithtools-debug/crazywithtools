@@ -2,7 +2,7 @@ export interface AddSettings {
   numFields: number;
   contents: string[];
   baseValues: number[];
-  mode: 'alternative' | 'sequential' | 'continuous';
+  mode: "alternative" | "sequential" | "continuous";
   // Optional: tags to exclude from Add insertion (e.g. ['h1','h2'])
   excludeHeadingTags?: string[];
 }
@@ -23,7 +23,7 @@ export interface ProcessedItem {
   content: string;
   // Full generated HTML (kept separate so UI can show an excerpt by default)
   generatedContent?: string;
-  status: 'pending' | 'processing' | 'success' | 'error';
+  status: "pending" | "processing" | "success" | "error";
   errorMsg?: string;
 }
 

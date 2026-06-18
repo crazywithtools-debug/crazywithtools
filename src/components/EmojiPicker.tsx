@@ -1,15 +1,15 @@
 "use client";
 
-import type { FC } from 'react';
+import type { FC } from "react";
 
 interface EmojiPickerProps {
-  variant?: 'title' | 'content';
+  variant?: "title" | "content";
   onSelect: (emoji: string) => void;
   onClose?: () => void;
 }
 
 export const EmojiPicker: FC<EmojiPickerProps> = ({ onSelect, onClose }) => {
-  const emojis = ['😀', '🎉', '🔥', '✨', '👍', '🤖'];
+  const emojis = ["😀", "🎉", "🔥", "✨", "👍", "🤖"];
   return (
     <div className="bg-white/5 p-2 rounded-xl shadow-lg">
       <div className="flex gap-2">

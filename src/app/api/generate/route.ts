@@ -1,23 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { error as logError } from '@/lib/logger';
-import { GoogleGenAI, Type } from '@google/genai';
-import type { GenerateRequestBody, GenerateResponseBody, GenerateErrorBody } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { error as logError } from "@/lib/logger";
+import { GoogleGenAI, Type } from "@google/genai";
+import type {
+  GenerateRequestBody,
+  GenerateResponseBody,
+  GenerateErrorBody,
+} from "@/types";
 
 // Ordered fallback chain: tried in sequence if the previous model/attempt fails.
 // Flash-lite models are fast & cheap, used as a fallback if the primary is
 // overloaded or rate limited.
-const MODEL_CHAIN = (process.env.GEN_MODEL_CHAIN && process.env.GEN_MODEL_CHAIN.split(',')) || [
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-2.0-flash',
+const MODEL_CHAIN = (process.env.GEN_MODEL_CHAIN &&
+  process.env.GEN_MODEL_CHAIN.split(",")) || [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
 ];
 
-const REQUEST_TIMEOUT_MS = Number(process.env.GEN_REQUEST_TIMEOUT_MS || 180_000);
+const REQUEST_TIMEOUT_MS = Number(
+  process.env.GEN_REQUEST_TIMEOUT_MS || 180_000,
+);
 const MAX_ATTEMPTS_PER_MODEL = 2;
 
 // Tunable defaults for generation quality and length. Can be overridden via
 // environment variables: GEN_MAX_OUTPUT_TOKENS, GEN_TEMPERATURE.
-const DEFAULT_GEN_MAX_OUTPUT_TOKENS = Number(process.env.GEN_MAX_OUTPUT_TOKENS || 8000);
+const DEFAULT_GEN_MAX_OUTPUT_TOKENS = Number(
+  process.env.GEN_MAX_OUTPUT_TOKENS || 8000,
+);
 const DEFAULT_GEN_TEMPERATURE = Number(process.env.GEN_TEMPERATURE || 0.28);
 
 const RESPONSE_SCHEMA = {
@@ -26,20 +35,20 @@ const RESPONSE_SCHEMA = {
     title: {
       type: Type.STRING,
       description:
-        'A unique, catchy, SEO and Google-friendly title for the content.',
+        "A unique, catchy, SEO and Google-friendly title for the content.",
     },
     content: {
       type: Type.STRING,
       description:
-        'The main body of the content, formatted in HTML using <p>, <ul>, <li>, <h2>, <h3>, <strong> tags where appropriate. Make it engaging, informative, and original.',
+        "The main body of the content, formatted in HTML using <p>, <ul>, <li>, <h2>, <h3>, <strong> tags where appropriate. Make it engaging, informative, and original.",
     },
   },
-  required: ['title', 'content'],
+  required: ["title", "content"],
 };
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('Request timed out')), ms);
+    const timer = setTimeout(() => reject(new Error("Request timed out")), ms);
     promise
       .then((val) => {
         clearTimeout(timer);
@@ -57,27 +66,35 @@ function sleep(ms: number): Promise<void> {
 }
 
 function isRetryableError(err: unknown): boolean {
-  const message = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+  const message =
+    err instanceof Error
+      ? err.message.toLowerCase()
+      : String(err).toLowerCase();
   return (
-    message.includes('overloaded') ||
-    message.includes('503') ||
-    message.includes('429') ||
-    message.includes('rate limit') ||
-    message.includes('timed out') ||
-    message.includes('timeout') ||
-    message.includes('internal') ||
-    message.includes('500') ||
-    message.includes('unavailable') ||
-    message.includes('fetch failed') ||
-    message.includes('network')
+    message.includes("overloaded") ||
+    message.includes("503") ||
+    message.includes("429") ||
+    message.includes("rate limit") ||
+    message.includes("timed out") ||
+    message.includes("timeout") ||
+    message.includes("internal") ||
+    message.includes("500") ||
+    message.includes("unavailable") ||
+    message.includes("fetch failed") ||
+    message.includes("network")
   );
 }
 
-function safeJsonParse(text: string): { title?: string; content?: string } | null {
+function safeJsonParse(
+  text: string,
+): { title?: string; content?: string } | null {
   // Strip markdown code fences if the model wraps the JSON despite instructions
   let cleaned = text.trim();
-  if (cleaned.startsWith('```')) {
-    cleaned = cleaned.replace(/^```(json)?/i, '').replace(/```$/, '').trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned
+      .replace(/^```(json)?/i, "")
+      .replace(/```$/, "")
+      .trim();
   }
 
   try {
@@ -103,8 +120,8 @@ export async function POST(req: NextRequest) {
     body = await req.json();
   } catch {
     return NextResponse.json<GenerateErrorBody>(
-      { error: 'Invalid JSON request body.' },
-      { status: 400 }
+      { error: "Invalid JSON request body." },
+      { status: 400 },
     );
   }
 
@@ -112,8 +129,8 @@ export async function POST(req: NextRequest) {
 
   if (!prompt || !prompt.trim()) {
     return NextResponse.json<GenerateErrorBody>(
-      { error: 'A prompt is required.' },
-      { status: 400 }
+      { error: "A prompt is required." },
+      { status: 400 },
     );
   }
 
@@ -125,15 +142,15 @@ export async function POST(req: NextRequest) {
     process.env.GEMINI_API_KEY ||
     process.env.GENAI_API_KEY ||
     process.env.NEXT_PUBLIC_GENAI_API_KEY ||
-    '';
+    "";
 
   if (!resolvedKey) {
     return NextResponse.json<GenerateErrorBody>(
       {
         error:
-          'No AI API key configured. Provide one in the request or set GEMINI_API_KEY on the server.',
+          "No AI API key configured. Provide one in the request or set GEMINI_API_KEY on the server.",
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -149,7 +166,7 @@ export async function POST(req: NextRequest) {
             model,
             contents: prompt,
             config: {
-              responseMimeType: 'application/json',
+              responseMimeType: "application/json",
               responseSchema: RESPONSE_SCHEMA,
               // Request longer, focused outputs and reduce randomness for
               // more consistent marketing copy.
@@ -158,12 +175,16 @@ export async function POST(req: NextRequest) {
               candidateCount: 1,
             },
           }) as Promise<{ text?: string }>,
-          REQUEST_TIMEOUT_MS
+          REQUEST_TIMEOUT_MS,
         );
 
-        const text = typeof response === 'object' && response !== null && 'text' in response && typeof response.text === 'string'
-          ? response.text
-          : '';
+        const text =
+          typeof response === "object" &&
+          response !== null &&
+          "text" in response &&
+          typeof response.text === "string"
+            ? response.text
+            : "";
         const parsed = safeJsonParse(text);
 
         if (parsed?.title && parsed?.content) {
@@ -175,7 +196,7 @@ export async function POST(req: NextRequest) {
 
         // Got a response but it didn't match the expected shape.
         lastError = new Error(
-          `Model "${model}" returned an unexpected response shape.`
+          `Model "${model}" returned an unexpected response shape.`,
         );
         // Don't retry the same model again for a malformed (but successful) response —
         // move to the next model in the chain instead.
@@ -184,15 +205,16 @@ export async function POST(req: NextRequest) {
         lastError = err;
         logError(
           `[generate] model=${model} attempt=${attempt} failed:`,
-          err instanceof Error ? err.message : err
+          err instanceof Error ? err.message : err,
         );
 
         if (!isRetryableError(err)) {
           // Non-retryable error (e.g. bad API key, invalid request) — stop entirely.
-          const message = err instanceof Error ? err.message : 'Generation failed.';
+          const message =
+            err instanceof Error ? err.message : "Generation failed.";
           return NextResponse.json<GenerateErrorBody>(
             { error: message },
-            { status: 502 }
+            { status: 502 },
           );
         }
 
@@ -208,10 +230,12 @@ export async function POST(req: NextRequest) {
   const message =
     lastError instanceof Error
       ? lastError.message
-      : 'All generation attempts failed.';
+      : "All generation attempts failed.";
 
   return NextResponse.json<GenerateErrorBody>(
-    { error: `Generation failed after trying all available models: ${message}` },
-    { status: 502 }
+    {
+      error: `Generation failed after trying all available models: ${message}`,
+    },
+    { status: 502 },
   );
 }

@@ -1,47 +1,43 @@
-import { describe, it, expect } from 'vitest';
-import { JSDOM } from 'jsdom';
+import { describe, it, expect } from "vitest";
+import { applyAddOperation } from "./text-processor";
 
-// Ensure a DOM environment for functions that use browser APIs
-if (typeof document === 'undefined') {
-  const dom = new JSDOM('<!doctype html><html><body></body></html>');
-  // @ts-ignore - test runtime setup
-  global.window = dom.window;
-  // @ts-ignore
-  global.document = dom.window.document;
-  // @ts-ignore
-  global.Node = dom.window.Node;
-}
-import { applyAddOperation } from './text-processor';
-
-describe('applyAddOperation', () => {
-  it('alternative mode uses baseValues[0] and cycles contents', () => {
-    const html = '<p>one two three four five six</p>';
+describe("applyAddOperation", () => {
+  it("alternative mode uses baseValues[0] and cycles contents", () => {
+    const html = "<p>one two three four five six</p>";
     const settings = {
       numFields: 3,
-      contents: ['<<<A>>>', '<<<B>>>', '<<<C>>>'],
-        baseValues: [2, 999],
-      mode: 'alternative',
+      contents: ["<<<A>>>", "<<<B>>>", "<<<C>>>"],
+      baseValues: [2, 999],
+      mode: "alternative",
     } as any;
     const out = applyAddOperation(html, settings);
 
-    const decoded = out.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-    const matches = Array.from(decoded.matchAll(/<<<[A-Z]>>>/g)).map((m) => m[0]);
-    expect(matches).toEqual(['<<<A>>>', '<<<B>>>', '<<<C>>>']);
+    const decoded = out
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+    const matches = Array.from(decoded.matchAll(/<<<[A-Z]>>>/g)).map(
+      (m) => m[0],
+    );
+    expect(matches).toEqual(["<<<A>>>", "<<<B>>>", "<<<C>>>"]);
     expect(matches.length).toBe(3);
   });
 
-  it('sequential mode applies each content in its own pass (both tokens present)', () => {
-    const html = '<p>one two three four five six seven eight nine</p>';
+  it("sequential mode applies each content in its own pass (both tokens present)", () => {
+    const html = "<p>one two three four five six seven eight nine</p>";
     const settings = {
       numFields: 2,
-      contents: ['<<<X>>>', '<<<Y>>>'],
+      contents: ["<<<X>>>", "<<<Y>>>"],
       baseValues: [2, 3],
-      mode: 'sequential',
+      mode: "sequential",
     } as any;
 
     const out = applyAddOperation(html, settings);
-    const decoded = out.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-    expect(decoded).toContain('<<<X>>>');
-    expect(decoded).toContain('<<<Y>>>');
+    const decoded = out
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+    expect(decoded).toContain("<<<X>>>");
+    expect(decoded).toContain("<<<Y>>>");
   });
 });

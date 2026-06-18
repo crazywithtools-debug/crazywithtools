@@ -1,8 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent, type TouchEvent, type ChangeEvent, type FC } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type TouchEvent,
+  type ChangeEvent,
+  type FC,
+} from "react";
 // Avoid motion/react dependency — use CSS transitions instead
-import { X, Bold, Underline, Image as ImageIcon, Palette, GripHorizontal } from 'lucide-react';
+import {
+  X,
+  Bold,
+  Underline,
+  Image as ImageIcon,
+  Palette,
+  GripHorizontal,
+} from "lucide-react";
 
 export interface Note {
   id: string | number;
@@ -21,7 +36,12 @@ interface StickyNoteProps {
   onBringToFront: (id: string | number) => void;
 }
 
-const StickyNote: FC<StickyNoteProps> = ({ note, onUpdate, onClose, onBringToFront }) => {
+const StickyNote: FC<StickyNoteProps> = ({
+  note,
+  onUpdate,
+  onClose,
+  onBringToFront,
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const noteRef = useRef<HTMLDivElement | null>(null);
@@ -54,10 +74,21 @@ const StickyNote: FC<StickyNoteProps> = ({ note, onUpdate, onClose, onBringToFro
   const handleMouseDown = (e: MouseEvent | TouchEvent) => {
     // ignore clicks on controls
     const target = (e as any).target as HTMLElement | null;
-    if (target && target.closest && target.closest('button, label, input, [contenteditable]')) return;
+    if (
+      target &&
+      target.closest &&
+      target.closest("button, label, input, [contenteditable]")
+    )
+      return;
 
-    const clientX = (e as React.TouchEvent).type === 'touchstart' ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
-    const clientY = (e as React.TouchEvent).type === 'touchstart' ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
+    const clientX =
+      (e as React.TouchEvent).type === "touchstart"
+        ? (e as React.TouchEvent).touches[0].clientX
+        : (e as React.MouseEvent).clientX;
+    const clientY =
+      (e as React.TouchEvent).type === "touchstart"
+        ? (e as React.TouchEvent).touches[0].clientY
+        : (e as React.MouseEvent).clientY;
 
     setIsDragging(true);
     onBringToFront(note.id);
@@ -67,32 +98,40 @@ const StickyNote: FC<StickyNoteProps> = ({ note, onUpdate, onClose, onBringToFro
   useEffect(() => {
     const handleMove = (e: MouseEvent | TouchEvent) => {
       if (!isDragging) return;
-      const clientX = (e as TouchEvent).type === 'touchmove' ? (e as TouchEvent).touches[0].clientX : (e as MouseEvent).clientX;
-      const clientY = (e as TouchEvent).type === 'touchmove' ? (e as TouchEvent).touches[0].clientY : (e as MouseEvent).clientY;
+      const clientX =
+        (e as TouchEvent).type === "touchmove"
+          ? (e as TouchEvent).touches[0].clientX
+          : (e as MouseEvent).clientX;
+      const clientY =
+        (e as TouchEvent).type === "touchmove"
+          ? (e as TouchEvent).touches[0].clientY
+          : (e as MouseEvent).clientY;
       onUpdate(note.id, { x: clientX - offset.x, y: clientY - offset.y });
     };
 
     const handleEnd = () => setIsDragging(false);
 
     if (isDragging) {
-      document.addEventListener('mousemove', handleMove as any);
-      document.addEventListener('mouseup', handleEnd);
-      document.addEventListener('touchmove', handleMove as any, { passive: false });
-      document.addEventListener('touchend', handleEnd as any);
+      document.addEventListener("mousemove", handleMove as any);
+      document.addEventListener("mouseup", handleEnd);
+      document.addEventListener("touchmove", handleMove as any, {
+        passive: false,
+      });
+      document.addEventListener("touchend", handleEnd as any);
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMove as any);
-      document.removeEventListener('mouseup', handleEnd);
-      document.removeEventListener('touchmove', handleMove as any);
-      document.removeEventListener('touchend', handleEnd as any);
+      document.removeEventListener("mousemove", handleMove as any);
+      document.removeEventListener("mouseup", handleEnd);
+      document.removeEventListener("touchmove", handleMove as any);
+      document.removeEventListener("touchend", handleEnd as any);
     };
   }, [isDragging, offset, note.id, onUpdate]);
 
   useEffect(() => {
     if (!contentRef.current) return;
     const currentHtml = contentRef.current.innerHTML;
-    const desiredHtml = note.content || '';
+    const desiredHtml = note.content || "";
     if (currentHtml !== desiredHtml) contentRef.current.innerHTML = desiredHtml;
   }, [note.content]);
 
@@ -119,7 +158,13 @@ const StickyNote: FC<StickyNoteProps> = ({ note, onUpdate, onClose, onBringToFro
     <div
       ref={noteRef}
       className="absolute w-[300px] max-w-[calc(100vw-32px)] min-h-[250px] shadow-2xl rounded-xl overflow-hidden flex flex-col pointer-events-auto border border-black/10 transition-transform duration-150"
-      style={{ left: note.x, top: note.y, zIndex: note.zIndex, backgroundColor: note.color || '#fff', transform: 'translateZ(0)' }}
+      style={{
+        left: note.x,
+        top: note.y,
+        zIndex: note.zIndex,
+        backgroundColor: note.color || "#fff",
+        transform: "translateZ(0)",
+      }}
       onMouseDown={() => onBringToFront(note.id)}
     >
       <div
@@ -130,18 +175,18 @@ const StickyNote: FC<StickyNoteProps> = ({ note, onUpdate, onClose, onBringToFro
         <GripHorizontal size={16} className="text-black/30 mr-1" />
         <input
           type="text"
-          value={note.title || ''}
+          value={note.title || ""}
           onChange={(e) => onUpdate(note.id, { title: e.target.value })}
           placeholder="Note Title"
           className="bg-transparent font-black uppercase tracking-widest text-[10px] outline-none placeholder:text-black/20 w-32"
-          style={{ color: 'rgba(0,0,0,0.6)' }}
+          style={{ color: "rgba(0,0,0,0.6)" }}
         />
 
         <div className="flex items-center gap-0.5 ml-auto">
           <button
             onClick={() => {
               onBringToFront(note.id);
-              applyInlineTag('strong');
+              applyInlineTag("strong");
             }}
             className="p-1.5 hover:bg-black/10 rounded-lg transition-colors text-black/60"
             title="Bold"
@@ -151,7 +196,7 @@ const StickyNote: FC<StickyNoteProps> = ({ note, onUpdate, onClose, onBringToFro
           <button
             onClick={() => {
               onBringToFront(note.id);
-              applyInlineTag('u');
+              applyInlineTag("u");
             }}
             className="p-1.5 hover:bg-black/10 rounded-lg transition-colors text-black/60"
             title="Underline"
@@ -159,14 +204,30 @@ const StickyNote: FC<StickyNoteProps> = ({ note, onUpdate, onClose, onBringToFro
             <Underline size={14} />
           </button>
 
-          <label className="p-1.5 hover:bg-black/10 rounded-lg transition-colors cursor-pointer text-black/60" title="Add Image">
+          <label
+            className="p-1.5 hover:bg-black/10 rounded-lg transition-colors cursor-pointer text-black/60"
+            title="Add Image"
+          >
             <ImageIcon size={14} />
-            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
           </label>
 
-          <label className="p-1.5 hover:bg-black/10 rounded-lg transition-colors cursor-pointer text-black/60" title="Change Color">
+          <label
+            className="p-1.5 hover:bg-black/10 rounded-lg transition-colors cursor-pointer text-black/60"
+            title="Change Color"
+          >
             <Palette size={14} />
-            <input type="color" value={note.color || '#ffffff'} className="hidden" onChange={(e) => onUpdate(note.id, { color: e.target.value })} />
+            <input
+              type="color"
+              value={note.color || "#ffffff"}
+              className="hidden"
+              onChange={(e) => onUpdate(note.id, { color: e.target.value })}
+            />
           </label>
 
           <button
@@ -188,7 +249,7 @@ const StickyNote: FC<StickyNoteProps> = ({ note, onUpdate, onClose, onBringToFro
         onBlur={handleContentInput}
         onMouseDown={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
-        style={{ color: 'rgba(0,0,0,0.8)' }}
+        style={{ color: "rgba(0,0,0,0.8)" }}
       />
     </div>
   );

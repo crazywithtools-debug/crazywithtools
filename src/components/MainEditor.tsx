@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, type RefObject, type FC } from 'react';
+import { useRef, useEffect, useState, type RefObject, type FC } from "react";
 import {
   Undo,
   Redo,
@@ -13,9 +13,14 @@ import {
   Smile,
   ChevronDown,
   Palette,
-} from 'lucide-react';
-import EmojiPicker from './EmojiPicker';
-import { themeColorMix, THEME_COLOR, TEXT_COLOR, ACTIVE_COLOR } from '@/lib/utils';
+} from "lucide-react";
+import EmojiPicker from "./EmojiPicker";
+import {
+  themeColorMix,
+  THEME_COLOR,
+  TEXT_COLOR,
+  ACTIVE_COLOR,
+} from "@/lib/utils";
 
 interface MainEditorProps {
   title: string;
@@ -31,7 +36,16 @@ interface MainEditorProps {
   contentClassName?: string;
 }
 
-export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content, onContentChange, showToolbar = true, editorRefProp, contentStyle, contentClassName }) => {
+export const MainEditor: FC<MainEditorProps> = ({
+  title,
+  onTitleChange,
+  content,
+  onContentChange,
+  showToolbar = true,
+  editorRefProp,
+  contentStyle,
+  contentClassName,
+}) => {
   const internalEditorRef = useRef<HTMLDivElement | null>(null);
   const editorRef = editorRefProp ?? internalEditorRef;
   const titleRef = useRef<HTMLInputElement | null>(null);
@@ -39,23 +53,36 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
   const toolbarRef = useRef<HTMLDivElement | null>(null);
   const selectionRangeRef = useRef<Range | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [emojiTarget, setEmojiTarget] = useState<'content' | 'title'>('content');
+  const [emojiTarget, setEmojiTarget] = useState<"content" | "title">(
+    "content",
+  );
   const [titleSelection, setTitleSelection] = useState({ start: 0, end: 0 });
 
   useEffect(() => {
-    if (editorRef && 'current' in editorRef && editorRef.current && editorRef.current.innerHTML !== content) {
-      editorRef.current.innerHTML = content;
+    try {
+      const el = editorRef && "current" in editorRef ? editorRef.current : null;
+      if (!el) return;
+      // If the editor currently has focus, avoid overwriting innerHTML as that
+      // will reset the caret/selection to the start. Wait until blur to apply
+      // external changes to content.
+      if (document.activeElement === el) return;
+      if (el.innerHTML !== content) el.innerHTML = content || "";
+    } catch (e) {
+      /* ignore */
     }
   }, [content, editorRef]);
 
   const updateTitleSelection = () => {
     const input = titleRef.current;
     if (!input) return;
-    setTitleSelection({ start: input.selectionStart ?? 0, end: input.selectionEnd ?? 0 });
+    setTitleSelection({
+      start: input.selectionStart ?? 0,
+      end: input.selectionEnd ?? 0,
+    });
   };
 
   const insertEmojiToTitle = (emoji: string) => {
-    const text = title || '';
+    const text = title || "";
     const { start, end } = titleSelection;
     const safeStart = Math.min(start, text.length);
     const safeEnd = Math.min(end, text.length);
@@ -105,45 +132,45 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
       const tb = toolbarRef.current as HTMLDivElement;
       const secRect = sec.getBoundingClientRect();
       const secStyle = window.getComputedStyle(sec);
-      const padLeft = parseFloat(secStyle.paddingLeft || '0') || 0;
-      const padRight = parseFloat(secStyle.paddingRight || '0') || 0;
+      const padLeft = parseFloat(secStyle.paddingLeft || "0") || 0;
+      const padRight = parseFloat(secStyle.paddingRight || "0") || 0;
       const left = secRect.left + padLeft;
       const width = Math.max(200, secRect.width - padLeft - padRight);
 
-      tb.style.position = 'fixed';
+      tb.style.position = "fixed";
       tb.style.left = `${left}px`;
       tb.style.width = `${width}px`;
       tb.style.top = `64px`;
-      tb.style.zIndex = '1200';
+      tb.style.zIndex = "1200";
     };
 
     update();
-    window.addEventListener('resize', update);
-    window.addEventListener('orientationchange', update);
-    window.addEventListener('scroll', update, true);
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    window.addEventListener("scroll", update, true);
 
     return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('orientationchange', update);
-      window.removeEventListener('scroll', update, true);
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+      window.removeEventListener("scroll", update, true);
       if (toolbarRef.current) {
-        toolbarRef.current.style.position = '';
-        toolbarRef.current.style.left = '';
-        toolbarRef.current.style.width = '';
-        toolbarRef.current.style.top = '';
-        toolbarRef.current.style.zIndex = '';
+        toolbarRef.current.style.position = "";
+        toolbarRef.current.style.left = "";
+        toolbarRef.current.style.width = "";
+        toolbarRef.current.style.top = "";
+        toolbarRef.current.style.zIndex = "";
       }
     };
   }, [showToolbar]);
 
   const execCommand = (command: string, value: string | null = null) => {
-    if (command !== 'insertHTML' && selectionRangeRef.current) {
+    if (command !== "insertHTML" && selectionRangeRef.current) {
       restoreSelection();
     }
 
     if (editorRef.current) editorRef.current.focus();
 
-    if (command === 'insertHTML' && value) {
+    if (command === "insertHTML" && value) {
       insertHtmlAtSelection(value);
       if (editorRef.current) onContentChange(editorRef.current.innerHTML);
       return;
@@ -156,9 +183,9 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
 
   const handleInsertLink = () => {
     saveSelection();
-    const url = prompt('Enter URL:', 'https://');
+    const url = prompt("Enter URL:", "https://");
     if (url) {
-      execCommand('createLink', url);
+      execCommand("createLink", url);
     }
   };
 
@@ -166,37 +193,37 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
     const value = e.target.value;
     if (!value) return;
 
-    if (value === 'custom') {
-      const size = prompt('Enter font size in pixels (e.g., 20):');
+    if (value === "custom") {
+      const size = prompt("Enter font size in pixels (e.g., 20):");
       if (size && !isNaN(parseInt(size))) {
         applyFontSize(parseInt(size, 10));
       }
     } else {
       applyFontSize(parseInt(value, 10));
     }
-    e.currentTarget.value = '';
+    e.currentTarget.value = "";
   };
 
   const handleFontFamily = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value) {
-      execCommand('fontName', value);
-      e.currentTarget.value = '';
+      execCommand("fontName", value);
+      e.currentTarget.value = "";
     }
   };
 
   const handleHeading = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value) {
-      execCommand('formatBlock', value);
-      e.currentTarget.value = '';
+      execCommand("formatBlock", value);
+      e.currentTarget.value = "";
     }
   };
 
   const handleTextColor = (e: React.ChangeEvent<HTMLInputElement>) => {
     const color = e.target.value;
     if (color) {
-      execCommand('foreColor', color);
+      execCommand("foreColor", color);
     }
   };
 
@@ -215,10 +242,11 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
 
   const applyFontSize = (size: number) => {
     const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed)
+      return;
 
     const range = selection.getRangeAt(0);
-    const span = document.createElement('span');
+    const span = document.createElement("span");
     span.style.fontSize = `${size}px`;
 
     try {
@@ -234,15 +262,30 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
 
   return (
     <div className="w-full flex-1 flex flex-col min-w-0 p-1.5 sm:p-3 md:p-4 lg:p-6">
-      <section ref={sectionRef} className="w-full bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm rounded-lg md:rounded-xl border shadow-sm flex flex-col min-w-0 flex-1 min-h-0 overflow-hidden" style={{ borderColor: themeColorMix() }}>
+      <section
+        ref={sectionRef}
+        className="w-full bg-gradient-to-br from-white/5 to-transparent backdrop-blur-sm rounded-lg md:rounded-xl border shadow-sm flex flex-col min-w-0 flex-1 min-h-0 overflow-hidden"
+        style={{ borderColor: themeColorMix() }}
+      >
         {/* Title Header */}
-        <header className="relative px-3 sm:px-4 md:px-6 pt-2 sm:pt-3 md:pt-4 pb-2 sm:pb-3 md:pb-4 border-b bg-white/5 flex flex-col gap-2 sm:gap-3" style={{ borderColor: themeColorMix() }}>
+        <header
+          className="relative px-3 sm:px-4 md:px-6 pt-2 sm:pt-3 md:pt-4 pb-2 sm:pb-3 md:pb-4 border-b bg-white/5 flex flex-col gap-2 sm:gap-3"
+          style={{ borderColor: themeColorMix() }}
+        >
           <div className="flex items-center justify-between w-full flex-wrap gap-2">
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest bg-white/10 px-2 py-1 rounded-md" style={{ color: THEME_COLOR, opacity: 0.55 }}>Title</span>
+            <span
+              className="text-[10px] sm:text-xs font-bold uppercase tracking-widest bg-white/10 px-2 py-1 rounded-md"
+              style={{ color: THEME_COLOR, opacity: 0.55 }}
+            >
+              Title
+            </span>
             <div className="flex items-center gap-1 sm:gap-2">
               <button
                 type="button"
-                onClick={() => { setEmojiTarget('title'); setShowEmojiPicker((p) => !p); }}
+                onClick={() => {
+                  setEmojiTarget("title");
+                  setShowEmojiPicker((p) => !p);
+                }}
                 className="p-1.5 sm:p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors shrink-0"
                 title="Insert emoji into title"
                 style={{ color: THEME_COLOR }}
@@ -258,7 +301,7 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
             inputMode="text"
             autoCapitalize="sentences"
             autoCorrect="on"
-            value={title || ''}
+            value={title || ""}
             onChange={(e) => onTitleChange(e.target.value)}
             onClick={updateTitleSelection}
             onKeyUp={updateTitleSelection}
@@ -268,89 +311,117 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
             style={{ color: TEXT_COLOR }}
             aria-label="Content title"
           />
-          {showEmojiPicker && emojiTarget === 'title' && (
+          {showEmojiPicker && emojiTarget === "title" && (
             <div className="mt-2">
-              <EmojiPicker onSelect={insertEmojiToTitle} onClose={() => setShowEmojiPicker(false)} />
+              <EmojiPicker
+                onSelect={insertEmojiToTitle}
+                onClose={() => setShowEmojiPicker(false)}
+              />
             </div>
           )}
         </header>
 
         {/* Content Label */}
         <div className="px-3 sm:px-4 md:px-6 py-2 sm:py-3 bg-white/2">
-          <div className="text-[10px] sm:text-xs text-white/40 font-semibold">CONTENT</div>
+          <div className="text-[10px] sm:text-xs text-white/40 font-semibold">
+            CONTENT
+          </div>
         </div>
 
         {/* Formatting Toolbar */}
         {showToolbar && (
-          <div 
+          <div
             ref={toolbarRef}
-            className="p-2 sm:p-3 border-b bg-white/5 overflow-x-auto scrollbar-thin" 
-            style={{ borderColor: themeColorMix(), touchAction: 'pan-x' }}
+            className="p-2 sm:p-3 border-b bg-white/5 overflow-x-auto scrollbar-thin"
+            style={{ borderColor: themeColorMix(), touchAction: "pan-x" }}
           >
             <div className="flex items-center gap-1 sm:gap-2 whitespace-nowrap flex-wrap">
               {/* Undo/Redo */}
-              <ToolbarButton onClick={() => execCommand('undo')} title="Undo">
+              <ToolbarButton onClick={() => execCommand("undo")} title="Undo">
                 <Undo size={16} />
               </ToolbarButton>
-              <ToolbarButton onClick={() => execCommand('redo')} title="Redo">
+              <ToolbarButton onClick={() => execCommand("redo")} title="Redo">
                 <Redo size={16} />
               </ToolbarButton>
 
               <Divider />
 
               {/* Text Formatting */}
-              <ToolbarButton onClick={() => execCommand('bold')} title="Bold (Ctrl+B)">
+              <ToolbarButton
+                onClick={() => execCommand("bold")}
+                title="Bold (Ctrl+B)"
+              >
                 <Bold size={16} />
               </ToolbarButton>
-              <ToolbarButton onClick={() => execCommand('italic')} title="Italic (Ctrl+I)">
+              <ToolbarButton
+                onClick={() => execCommand("italic")}
+                title="Italic (Ctrl+I)"
+              >
                 <Italic size={16} />
               </ToolbarButton>
-              <ToolbarButton onClick={() => execCommand('underline')} title="Underline (Ctrl+U)">
+              <ToolbarButton
+                onClick={() => execCommand("underline")}
+                title="Underline (Ctrl+U)"
+              >
                 <Underline size={16} />
               </ToolbarButton>
 
               <Divider />
 
               {/* Lists */}
-              <ToolbarButton onClick={() => execCommand('insertUnorderedList')} title="Bulleted List">
+              <ToolbarButton
+                onClick={() => execCommand("insertUnorderedList")}
+                title="Bulleted List"
+              >
                 <List size={16} />
               </ToolbarButton>
-              <ToolbarButton onClick={() => execCommand('insertOrderedList')} title="Numbered List">
+              <ToolbarButton
+                onClick={() => execCommand("insertOrderedList")}
+                title="Numbered List"
+              >
                 <ListOrdered size={16} />
               </ToolbarButton>
 
               <Divider />
 
               {/* Link & Emoji */}
-              <ToolbarButton onMouseDown={saveSelection} onClick={handleInsertLink} title="Insert Link">
+              <ToolbarButton
+                onMouseDown={saveSelection}
+                onClick={handleInsertLink}
+                title="Insert Link"
+              >
                 <LinkIcon size={16} />
               </ToolbarButton>
               <div className="relative">
-                <ToolbarButton 
+                <ToolbarButton
                   onMouseDown={saveSelection}
                   onClick={() => {
-                    setEmojiTarget('content');
+                    setEmojiTarget("content");
                     setShowEmojiPicker((p) => !p);
-                  }} 
+                  }}
                   title="Insert Emoji"
                 >
                   <Smile size={16} />
                 </ToolbarButton>
-                {showEmojiPicker && emojiTarget === 'content' && (
+                {showEmojiPicker && emojiTarget === "content" && (
                   <div className="absolute top-full left-0 mt-1 z-50">
-                    <EmojiPicker 
+                    <EmojiPicker
                       onSelect={(emoji) => {
-                        execCommand('insertHTML', emoji);
+                        execCommand("insertHTML", emoji);
                         setShowEmojiPicker(false);
-                      }} 
-                      onClose={() => setShowEmojiPicker(false)} 
+                      }}
+                      onClose={() => setShowEmojiPicker(false)}
                     />
                   </div>
                 )}
               </div>
 
               {/* Image Upload */}
-              <label className="p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer" style={{ color: THEME_COLOR }} title="Insert Image">
+              <label
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                style={{ color: THEME_COLOR }}
+                title="Insert Image"
+              >
                 <input
                   type="file"
                   accept="image/*"
@@ -358,7 +429,14 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
                   onChange={handleImageUpload}
                   aria-label="Upload image"
                 />
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
@@ -368,9 +446,9 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
               <Divider />
 
               {/* Heading Selector */}
-              <select 
+              <select
                 onMouseDown={saveSelection}
-                onChange={handleHeading} 
+                onChange={handleHeading}
                 className="text-xs px-2 py-1 rounded bg-white/5 border outline-none cursor-pointer"
                 style={{ color: TEXT_COLOR, borderColor: themeColorMix() }}
                 title="Paragraph style"
@@ -382,7 +460,7 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
               </select>
 
               {/* Font Family Selector */}
-              <select 
+              <select
                 onMouseDown={saveSelection}
                 onChange={handleFontFamily}
                 className="hidden sm:inline-block text-xs px-2 py-1 rounded bg-white/5 border outline-none cursor-pointer"
@@ -398,7 +476,7 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
               </select>
 
               {/* Font Size Selector */}
-              <select 
+              <select
                 onMouseDown={saveSelection}
                 onChange={handleFontSize}
                 className="hidden sm:inline-block text-xs px-2 py-1 rounded bg-white/5 border outline-none cursor-pointer"
@@ -416,7 +494,10 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
               </select>
 
               {/* Text Color Picker */}
-              <label className="flex items-center gap-1 p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer" title="Text color">
+              <label
+                className="flex items-center gap-1 p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                title="Text color"
+              >
                 <Palette size={16} style={{ color: THEME_COLOR }} />
                 <input
                   type="color"
@@ -436,9 +517,18 @@ export const MainEditor: FC<MainEditorProps> = ({ title, onTitleChange, content,
         <div
           ref={editorRef as any}
           contentEditable
-          onInput={(e) => onContentChange((e.currentTarget as HTMLDivElement).innerHTML)}
-          className={contentClassName || 'w-full flex-1 min-h-0 bg-gradient-to-br from-gray-900/40 to-black/40 border-t border-white/5 p-2 sm:p-3 md:p-4 lg:p-6 overflow-y-auto prose prose-invert max-w-none scrollbar-thin scrollbar-thumb-white/10'}
-          style={{ color: TEXT_COLOR, WebkitOverflowScrolling: 'touch', ...(contentStyle || {}) }}
+          onInput={(e) =>
+            onContentChange((e.currentTarget as HTMLDivElement).innerHTML)
+          }
+          className={
+            contentClassName ||
+            "w-full flex-1 min-h-0 bg-gradient-to-br from-gray-900/40 to-black/40 border-t border-white/5 p-2 sm:p-3 md:p-4 lg:p-6 overflow-y-auto prose prose-invert max-w-none scrollbar-thin scrollbar-thumb-white/10"
+          }
+          style={{
+            color: TEXT_COLOR,
+            WebkitOverflowScrolling: "touch",
+            ...(contentStyle || {}),
+          }}
           role="textbox"
           aria-multiline="true"
         />
@@ -463,9 +553,9 @@ const ToolbarButton: FC<any> = ({ onClick, onMouseDown, title, children }) => (
 );
 
 const Divider: FC = () => (
-  <div 
-    className="w-px h-6 mx-1 shrink-0" 
-    style={{ backgroundColor: themeColorMix(80) }} 
+  <div
+    className="w-px h-6 mx-1 shrink-0"
+    style={{ backgroundColor: themeColorMix(80) }}
   />
 );
 

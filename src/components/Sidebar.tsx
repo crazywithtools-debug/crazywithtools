@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo, type FC, type ReactNode } from 'react';
+import { useState, memo, type FC, type ReactNode } from "react";
 import {
   LayoutGrid,
   Replace,
@@ -14,9 +14,9 @@ import {
   Undo,
   Redo,
   Sparkles,
-} from 'lucide-react';
-import { cn, themeColorMix, THEME_COLOR, ACTIVE_COLOR } from '@/lib/utils';
-import type { StickyNote as StickyNoteType, AddSettings } from '@/types';
+} from "lucide-react";
+import { cn, themeColorMix, THEME_COLOR, ACTIVE_COLOR } from "@/lib/utils";
+import type { StickyNote as StickyNoteType, AddSettings } from "@/types";
 
 interface SidebarProps {
   activeTools?: {
@@ -28,7 +28,7 @@ interface SidebarProps {
   };
   // Optional: provide the current Add insertion mode to allow the sidebar to reflect
   // that the Add feature is active when insertion mode is selected (alternative/sequential).
-  addMode?: AddSettings['mode'];
+  addMode?: AddSettings["mode"];
   onToolToggle?: (tool: string) => void;
   onImportClick?: () => void;
   stickyNotes?: StickyNoteType[];
@@ -60,27 +60,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
   collapsed = false,
   onMenuToggle,
 }) => {
-  const [editingNoteId, setEditingNoteId] = useState<string | number | null>(null);
+  const [editingNoteId, setEditingNoteId] = useState<string | number | null>(
+    null,
+  );
   const [menuOpenId, setMenuOpenId] = useState<string | number | null>(null);
 
   return (
     <aside
-      className={cn('flex flex-col transition-all duration-300 overflow-hidden h-full w-full font-poppins bg-gradient-to-b from-white/5 to-white/2')}
+      className={cn(
+        "flex flex-col transition-all duration-300 overflow-hidden h-full w-full font-poppins bg-gradient-to-b from-white/5 to-white/2",
+      )}
       style={{ color: THEME_COLOR }}
     >
-        <div
-          className={cn('p-3 sm:p-4 border-b flex items-center gap-2 sm:gap-3 flex-shrink-0', collapsed ? 'justify-center' : '')}
-          style={{ borderColor: themeColorMix(90) }}
-        >
+      <div
+        className={cn(
+          "p-3 sm:p-4 border-b flex items-center gap-2 sm:gap-3 flex-shrink-0",
+          collapsed ? "justify-center" : "",
+        )}
+        style={{ borderColor: themeColorMix(90) }}
+      >
         <button
           onClick={onMenuToggle}
           className="p-1.5 hover:bg-white/10 rounded-lg transition-colors shrink-0"
           style={{ color: THEME_COLOR }}
-          title={collapsed ? 'Expand Menu' : 'Collapse Menu'}
+          title={collapsed ? "Expand Menu" : "Collapse Menu"}
         >
           <LayoutGrid size={18} />
         </button>
-        {!collapsed && <h4 className="font-bold text-xs sm:text-sm uppercase tracking-wider truncate">Menu</h4>}
+        {!collapsed && (
+          <h4 className="font-bold text-xs sm:text-sm uppercase tracking-wider truncate">
+            Menu
+          </h4>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
@@ -88,31 +99,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon={<Replace size={16} />}
           label="Replace"
           active={!!activeTools.replace}
-          onClick={() => onToolToggle && onToolToggle('replace')}
+          onClick={() => onToolToggle && onToolToggle("replace")}
           collapsed={collapsed}
         />
         <ToolItem
           icon={<Plus size={16} />}
           label="Add"
-          active={addMode === 'alternative' || addMode === 'sequential'}
-          tooltip={addMode ? `Insertion mode: ${addMode}` : 'Insertion mode: off'}
-          onClick={() => onToolToggle && onToolToggle('add')}
+          active={addMode === "alternative" || addMode === "sequential"}
+          tooltip={
+            addMode ? `Insertion mode: ${addMode}` : "Insertion mode: off"
+          }
+          onClick={() => onToolToggle && onToolToggle("add")}
           collapsed={collapsed}
         />
         {/* Edit toggle removed; edit always enabled in main editor */}
-        <ToolItem icon={<Import size={16} />} label="Import File" onClick={onImportClick} collapsed={collapsed} />
+        <ToolItem
+          icon={<Import size={16} />}
+          label="Import File"
+          onClick={onImportClick}
+          collapsed={collapsed}
+        />
         <ToolItem
           icon={<Sparkles size={16} />}
           label="AI Content"
           active={!!activeTools.aiContent}
-          onClick={() => onToolToggle && onToolToggle('aiContent')}
+          onClick={() => onToolToggle && onToolToggle("aiContent")}
           collapsed={collapsed}
         />
         <ToolItem
           icon={<StickyNoteIcon size={16} />}
           label="Sticky Notes"
           active={!!activeTools.stickyNotes}
-          onClick={() => onToolToggle && onToolToggle('stickyNotes')}
+          onClick={() => onToolToggle && onToolToggle("stickyNotes")}
           collapsed={collapsed}
         />
 
@@ -121,12 +139,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {activeTools.stickyNotes && !collapsed && (
           <div className="mt-4 sm:mt-6 px-3 sm:px-4">
             <div className="flex items-center justify-between mb-2">
-              <h5 className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest opacity-60">Notes</h5>
+              <h5 className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest opacity-60">
+                Notes
+              </h5>
               <div className="flex items-center gap-1">
-                <button onClick={onAddNote} className="p-1 hover:bg-white/10 rounded transition-colors" title="Add New Note">
+                <button
+                  onClick={onAddNote}
+                  className="p-1 hover:bg-white/10 rounded transition-colors"
+                  title="Add New Note"
+                >
                   <Plus size={12} />
                 </button>
-                <button onClick={onClearAllNotes} className="p-1 hover:bg-white/10 rounded hover:text-red-500 transition-colors" title="Clear All">
+                <button
+                  onClick={onClearAllNotes}
+                  className="p-1 hover:bg-white/10 rounded hover:text-red-500 transition-colors"
+                  title="Clear All"
+                >
                   <Trash2 size={12} />
                 </button>
               </div>
@@ -138,7 +166,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className="group relative flex items-center gap-2 p-2 rounded-lg hover:bg-white/5 cursor-pointer text-xs sm:text-sm"
                   onClick={() => onOpenNote && onOpenNote(note.id)}
                 >
-                  <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: note.color }} />
+                  <div
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: note.color }}
+                  />
                   {editingNoteId === note.id ? (
                     <input
                       autoFocus
@@ -150,14 +181,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         setEditingNoteId(null);
                       }}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          onRenameNote && onRenameNote(note.id, (e.currentTarget as HTMLInputElement).value);
+                        if (e.key === "Enter") {
+                          onRenameNote &&
+                            onRenameNote(
+                              note.id,
+                              (e.currentTarget as HTMLInputElement).value,
+                            );
                           setEditingNoteId(null);
                         }
                       }}
                     />
                   ) : (
-                    <span className="truncate flex-1 opacity-80 text-xs" onClick={() => setEditingNoteId(note.id)}>
+                    <span
+                      className="truncate flex-1 opacity-80 text-xs"
+                      onClick={() => setEditingNoteId(note.id)}
+                    >
                       {note.title}
                     </span>
                   )}
@@ -174,7 +212,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </button>
 
                     {menuOpenId === note.id && (
-                      <div className="absolute right-0 top-full mt-1 w-32 bg-gradient-to-b from-zinc-800 to-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 py-1" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className="absolute right-0 top-full mt-1 w-32 bg-gradient-to-b from-zinc-800 to-zinc-900 border border-white/10 rounded-lg shadow-xl z-50 py-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <button
                           onClick={() => {
                             setEditingNoteId(note.id);
@@ -192,7 +233,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <Undo size={10} /> Undo
                         </button>
                         <button
-                          disabled={!(note.titleHistory && (note.titleHistoryIndex ?? 0) < (note.titleHistory.length - 1))}
+                          disabled={
+                            !(
+                              note.titleHistory &&
+                              (note.titleHistoryIndex ?? 0) <
+                                note.titleHistory.length - 1
+                            )
+                          }
                           onClick={() => onRedoRename && onRedoRename(note.id)}
                           className="w-full text-left px-3 py-1.5 text-xs hover:bg-white/10 flex items-center gap-2 disabled:opacity-30 transition"
                         >
@@ -213,7 +260,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 </div>
               ))}
-              {stickyNotes.length === 0 && <p className="text-[9px] sm:text-[10px] italic py-2 opacity-40">No notes yet</p>}
+              {stickyNotes.length === 0 && (
+                <p className="text-[9px] sm:text-[10px] italic py-2 opacity-40">
+                  No notes yet
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -224,24 +275,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
 export default memo(Sidebar);
 
-const ToolItem: FC<{ icon: ReactNode; label: string; active?: boolean; onClick?: () => void; collapsed?: boolean; tooltip?: string }> = ({ icon, label, active, onClick, collapsed, tooltip }) => (
+const ToolItem: FC<{
+  icon: ReactNode;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+  collapsed?: boolean;
+  tooltip?: string;
+}> = ({ icon, label, active, onClick, collapsed, tooltip }) => (
   <button
     onClick={onClick}
     className={cn(
-      'w-full flex items-center transition-all relative group',
-      collapsed ? 'justify-center px-0 py-3 sm:py-4' : 'gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3',
-      active ? 'bg-gradient-to-r from-blue-500/20 to-transparent' : 'hover:bg-white/5'
+      "w-full flex items-center transition-all relative group",
+      collapsed
+        ? "justify-center px-0 py-3 sm:py-4"
+        : "gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3",
+      active
+        ? "bg-gradient-to-r from-blue-500/20 to-transparent"
+        : "hover:bg-white/5",
     )}
-    style={{ color: active ? ACTIVE_COLOR : THEME_COLOR, opacity: active ? 1 : 0.6 }}
+    style={{
+      color: active ? ACTIVE_COLOR : THEME_COLOR,
+      opacity: active ? 1 : 0.6,
+    }}
     title={tooltip ?? (collapsed ? label : undefined)}
   >
-    <div className={cn('shrink-0 transition-transform group-active:scale-90')} style={{ color: active ? ACTIVE_COLOR : THEME_COLOR }}>
+    <div
+      className={cn("shrink-0 transition-transform group-active:scale-90")}
+      style={{ color: active ? ACTIVE_COLOR : THEME_COLOR }}
+    >
       {icon}
     </div>
-    {!collapsed && <span className="text-xs sm:text-sm font-medium truncate">{label}</span>}
-    {active && !collapsed && <ChevronRight size={12} className="ml-auto opacity-50 shrink-0" />}
+    {!collapsed && (
+      <span className="text-xs sm:text-sm font-medium truncate">{label}</span>
+    )}
+    {active && !collapsed && (
+      <ChevronRight size={12} className="ml-auto opacity-50 shrink-0" />
+    )}
     {active && (
-      <div className={cn('absolute rounded-r-full transition-all', collapsed ? 'left-0 top-2 bottom-2 w-1' : 'left-0 top-1/4 bottom-1/4 w-1')} style={{ backgroundColor: ACTIVE_COLOR }} />
+      <div
+        className={cn(
+          "absolute rounded-r-full transition-all",
+          collapsed
+            ? "left-0 top-2 bottom-2 w-1"
+            : "left-0 top-1/4 bottom-1/4 w-1",
+        )}
+        style={{ backgroundColor: ACTIVE_COLOR }}
+      />
     )}
   </button>
 );
