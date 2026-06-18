@@ -5,8 +5,8 @@
   "framework": "nextjs",
   "nodeVersion": "20.x",
   "env": {
-    "NEXT_PUBLIC_MONGODB_URI": "@mongodb_uri",
-    "MONGODB_URI": "@mongodb_uri",
-    "NEXT_PUBLIC_GENAI_API_KEY": "@genai_api_key"
+    "NEXT_PUBLIC_GENAI_API_KEY": "@genai_api_key",
+    "GENAI_API_KEY": "@genai_api_key",
+    "GEMINI_API_KEY": "@genai_api_key"
   }
 }

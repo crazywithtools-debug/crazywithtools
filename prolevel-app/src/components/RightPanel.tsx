@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type FC, type KeyboardEvent } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { themeColorMix, TEXT_COLOR, THEME_COLOR, ACTIVE_COLOR, BUTTON_BG_COLOR, BUTTON_TEXT_COLOR } from '@/lib/utils';
 import type { AddSettings, ReplaceSettings } from '@/types';
 
@@ -16,6 +16,16 @@ interface RightPanelProps {
   onAddSettingsChange: (patch: Partial<AddSettings>) => void;
   replaceSettings: ReplaceSettings;
   onReplaceSettingsChange: (patch: Partial<ReplaceSettings>) => void;
+  // Optional hooks from parent page
+  isAddEnabled?: boolean;
+  isReplaceEnabled?: boolean;
+  onToggleAddEnabled?: (v: boolean) => void;
+  onToggleReplaceEnabled?: (v: boolean) => void;
+  onAddNewField?: () => void;
+  onRemoveNewField?: (index: number) => void;
+  onApplyAdd?: () => void;
+  onUndoActive?: () => void;
+  undoDisabled?: boolean;
 }
 
 const RightPanel: FC<RightPanelProps> = ({
@@ -24,6 +34,15 @@ const RightPanel: FC<RightPanelProps> = ({
   onAddSettingsChange,
   replaceSettings,
   onReplaceSettingsChange,
+  isAddEnabled,
+  isReplaceEnabled,
+  onToggleAddEnabled,
+  onToggleReplaceEnabled,
+  onAddNewField,
+  onRemoveNewField,
+  onApplyAdd,
+  onUndoActive,
+  undoDisabled,
 }) => {
   if (!activeTools?.add && !activeTools?.replace) return null;
 
@@ -32,69 +51,92 @@ const RightPanel: FC<RightPanelProps> = ({
     if (['e', 'E', '+', '-', '.'].includes(key)) e.preventDefault();
   };
 
+  const handleSetAddMode = (mode: AddSettings['mode']) => {
+    if (!onAddSettingsChange) return;
+    if (mode === 'alternative') {
+      const base = addSettings.baseValues?.[0] ?? 16;
+      onAddSettingsChange({ mode, baseValues: [base] });
+    } else if (mode === 'sequential') {
+      const baseValues = (addSettings.baseValues || []).slice(0, addSettings.numFields);
+      while (baseValues.length < addSettings.numFields) baseValues.push(baseValues[baseValues.length - 1] ?? 16);
+      onAddSettingsChange({ mode, baseValues });
+    } else {
+      onAddSettingsChange({ mode });
+    }
+  };
+
+  const handleAddNewFieldLocal = () => {
+    if (typeof onAddNewField === 'function') return onAddNewField();
+    const num = addSettings.numFields + 1;
+    const contents = [...addSettings.contents, ''];
+    let baseValues: number[] = [];
+    if (addSettings.mode === 'sequential') {
+      baseValues = [...(addSettings.baseValues || []), addSettings.baseValues?.[addSettings.baseValues.length - 1] ?? 16];
+    } else if (addSettings.mode === 'alternative') {
+      baseValues = [addSettings.baseValues?.[0] ?? 16];
+    } else {
+      baseValues = [];
+    }
+    onAddSettingsChange({ numFields: num, contents, baseValues });
+  };
+
+  const handleRemoveNewFieldLocal = (index: number) => {
+    if (typeof onRemoveNewField === 'function') return onRemoveNewField(index);
+    if (addSettings.numFields <= 1) return;
+    const contents = addSettings.contents.filter((_, i) => i !== index);
+    let baseValues: number[] = [];
+    if (addSettings.mode === 'sequential') {
+      baseValues = (addSettings.baseValues || []).filter((_, i) => i !== index);
+    } else if (addSettings.mode === 'alternative') {
+      baseValues = [addSettings.baseValues?.[0] ?? 16];
+    } else {
+      baseValues = [];
+    }
+    onAddSettingsChange({ numFields: addSettings.numFields - 1, contents, baseValues });
+  };
+
+  const handleContentChangeLocal = (index: number, value: string) => {
+    const next = [...addSettings.contents];
+    next[index] = value;
+    onAddSettingsChange({ contents: next });
+  };
+
+  const handleBaseValueChangeLocal = (index: number, value: string) => {
+    const parsed = parseInt(value, 10);
+    const val = isNaN(parsed) ? 1 : parsed;
+    if (addSettings.mode === 'alternative' || addSettings.numFields === 1) {
+      onAddSettingsChange({ baseValues: [val] });
+      return;
+    }
+    const next = [...(addSettings.baseValues || [])];
+    next[index] = val;
+    onAddSettingsChange({ baseValues: next });
+  };
+
   return (
     <aside className="w-full flex flex-col gap-3 sm:gap-4 md:gap-6 p-3 sm:p-4 md:p-6 overflow-y-auto scrollbar-thin" style={{ color: THEME_COLOR }}>
       {activeTools.add && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h5 className="text-xs font-black uppercase tracking-widest" style={{ color: THEME_COLOR }}>
-              Add Section
-            </h5>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 bg-white/5 border rounded-full px-3 py-1 text-xs font-bold" style={{ borderColor: themeColorMix(90) }}>
-                <span className="opacity-60 text-[10px]">Fields</span>
-                <input
-                  aria-label="Add fields"
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={addSettings.numFields}
-                  onChange={(e) => {
-                    const raw = parseInt(e.target.value, 10);
-                    const num = Number.isNaN(raw) ? 1 : Math.max(1, Math.min(10, raw));
-                    const contents = addSettings.contents.slice(0, num);
-                      const baseValues = addSettings.baseValues.slice(0, num);
-                      while (contents.length < num) contents.push('');
-                      while (baseValues.length < num) baseValues.push(16);
-                    onAddSettingsChange({ numFields: num, contents, baseValues });
-                  }}
-                  className="w-10 bg-transparent text-xs font-bold text-right outline-none"
-                  style={{ color: TEXT_COLOR }}
-                />
-              </div>
-            </div>
-          </div>
+          <div className="bg-[#121214] border border-white/5 rounded-3xl p-4">
+            <label className="flex items-center gap-2 cursor-pointer select-none group border-b border-white/5 pb-2">
+              <input
+                type="checkbox"
+                checked={isAddEnabled ?? !!activeTools.add}
+                onChange={(e) => onToggleAddEnabled?.(e.target.checked)}
+                className="w-4 h-4 rounded border-white/10 bg-black/40 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+              />
+              <h3 className="text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-1.5 group-hover:text-emerald-400 transition-colors">
+                <Plus size={14} style={{ color: ACTIVE_COLOR }} /> Add Insertion
+              </h3>
+            </label>
 
-          <div className="space-y-4">
-            {Array.from({ length: addSettings.numFields }).map((_, i) => (
-              <div key={i} className="space-y-2">
-                <label className="text-[10px] font-bold uppercase opacity-40" style={{ color: THEME_COLOR }}>
-                  New Content {i + 1}
-                </label>
-                <textarea
-                  value={addSettings.contents[i] || ''}
-                  onChange={(e) => {
-                    const contents = [...addSettings.contents];
-                    contents[i] = e.target.value;
-                    onAddSettingsChange({ contents });
-                  }}
-                  placeholder={`Enter content ${i + 1}...`}
-                  className="w-full min-h-20 bg-white/5 border rounded-xl p-3 text-sm outline-none transition-all placeholder:opacity-20"
-                  style={{ color: TEXT_COLOR, borderColor: themeColorMix(90) }}
-                />
-              </div>
-            ))}
-          </div>
-
-          {addSettings.numFields > 1 && (
-            <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase opacity-40" style={{ color: THEME_COLOR }}>
-                  Insertion Mode
-                </label>
-                <div className="grid grid-cols-2 gap-1 bg-white/5 border rounded-2xl p-0.5">
+            <div className="space-y-3 mt-3">
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Insertion Mode</span>
+                <div className="grid grid-cols-2 gap-1 bg-black/40 border border-white/10 p-0.5 rounded-2xl">
                   <button
                     type="button"
-                    onClick={() => onAddSettingsChange({ mode: 'alternative' })}
+                    onClick={() => handleSetAddMode('alternative')}
                     className="py-1 text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer"
                     aria-pressed={addSettings.mode === 'alternative'}
                     title={addSettings.mode === 'alternative' ? 'Active insertion mode: Alternative' : 'Set insertion mode: Alternative'}
@@ -105,7 +147,7 @@ const RightPanel: FC<RightPanelProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => onAddSettingsChange({ mode: 'sequential' })}
+                    onClick={() => handleSetAddMode('sequential')}
                     className="py-1 text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer"
                     aria-pressed={addSettings.mode === 'sequential'}
                     title={addSettings.mode === 'sequential' ? 'Active insertion mode: Sequential' : 'Set insertion mode: Sequential'}
@@ -116,63 +158,97 @@ const RightPanel: FC<RightPanelProps> = ({
                   </button>
                 </div>
               </div>
-          )}
 
-          {/* Show interval controls depending on insertion mode:
-              - 'alternative' (or single field): one global "Insert Every (N) Words"
-              - 'sequential': each entry shows its own "Insert Every (N) Words" control (rendered inline per-entry)
-              - 'continuous' or others: no interval controls shown (only text fields)
-          */}
-          {addSettings.mode === 'alternative' || addSettings.numFields === 1 ? (
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase opacity-40" style={{ color: THEME_COLOR }}>
-                Insert after every X words
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={addSettings.baseValues[0] || ''}
-                onKeyDown={handleNumberOnly}
-                onChange={(e) => {
-                  const baseValues = [...addSettings.baseValues];
-                  baseValues[0] = parseInt(e.target.value, 10) || 16;
-                  onAddSettingsChange({ baseValues });
-                }}
-                placeholder="Enter word count..."
-                className="w-full bg-white/5 border rounded-xl px-4 py-2 text-sm outline-none placeholder:opacity-20"
-                style={{ color: TEXT_COLOR, borderColor: themeColorMix(90) }}
-              />
-            </div>
-          ) : null}
+              {(addSettings.mode === 'alternative' || addSettings.numFields === 1) && (
+                <div className="space-y-2">
+                  <label className="text-[8px] font-bold uppercase tracking-widest text-white/40">Insert Every (N) Words</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={addSettings.baseValues[0] || ''}
+                    onKeyDown={handleNumberOnly}
+                    onChange={(e) => handleBaseValueChangeLocal(0, e.target.value)}
+                    placeholder="e.g. 16"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs text-white outline-none focus:border-emerald-400 font-bold"
+                  />
+                </div>
+              )}
 
-          {addSettings.mode === 'sequential' && addSettings.numFields > 0 ? (
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase opacity-40" style={{ color: THEME_COLOR }}>
-                Word counts for each field
-              </label>
-              <div className="grid grid-cols-1 gap-2">
-                {Array.from({ length: addSettings.numFields }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className="text-[10px] font-black uppercase opacity-40 w-6">#{i + 1}</div>
-                      <input
-                      type="number"
-                      min={1}
-                      value={addSettings.baseValues[i] || ''}
-                      onKeyDown={handleNumberOnly}
-                      onChange={(e) => {
-                        const baseValues = [...addSettings.baseValues];
-                        baseValues[i] = parseInt(e.target.value, 10) || 16;
-                        onAddSettingsChange({ baseValues });
-                      }}
-                      placeholder="e.g. 5"
-                      className="w-full bg-white/5 border rounded-xl px-2 py-1 text-xs text-white outline-none font-bold"
-                        style={{ color: TEXT_COLOR, borderColor: themeColorMix(90) }}
-                    />
+              <div className="space-y-3 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
+                {addSettings.contents.map((content, idx) => (
+                  <div key={idx} className="p-3 bg-white/5 border border-white/5 rounded-2xl space-y-2 relative group text-left">
+                    {addSettings.numFields > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveNewFieldLocal(idx)}
+                        className="absolute top-1.5 right-1.5 p-1 hover:bg-red-500/10 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer"
+                        title="Remove row"
+                      >
+                        <Trash2 size={11} />
+                      </button>
+                    )}
+                    <div style={{ color: ACTIVE_COLOR }} className="text-[9px] font-black uppercase tracking-widest">Entry #{idx + 1}</div>
+
+                    <div className="grid grid-cols-1 gap-1">
+                      {addSettings.mode === 'sequential' && (
+                        <div className="space-y-0.5">
+                          <label className="text-[8px] font-bold uppercase tracking-widest text-white/40">Insert Every (N) Words</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={addSettings.baseValues[idx] || ''}
+                            onChange={(e) => handleBaseValueChangeLocal(idx, e.target.value)}
+                            placeholder="e.g. 5"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs text-white outline-none focus:border-emerald-400 font-bold"
+                          />
+                        </div>
+                      )}
+
+                      <div className="space-y-0.5">
+                        <label className="text-[8px] font-bold uppercase tracking-widest text-white/40">Text to Insert</label>
+                        <input
+                          type="text"
+                          value={content}
+                          onChange={(e) => handleContentChangeLocal(idx, e.target.value)}
+                          placeholder="e.g. [ADDON]"
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs text-white outline-none focus:border-emerald-400"
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
+
+              <button
+                type="button"
+                onClick={handleAddNewFieldLocal}
+                className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/15 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1"
+              >
+                <Plus size={11} /> Add Field Row
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onApplyAdd?.()}
+                  disabled={!onApplyAdd || addSettings.contents.length === 0}
+                  className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-30 rounded-xl text-[10px] font-black uppercase tracking-widest text-black transition active:scale-[0.98]"
+                >
+                  Insert Keys on Current
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onUndoActive?.()}
+                  disabled={!onUndoActive || undoDisabled}
+                  title="Undo last insertion"
+                  className="px-3 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 border border-white/10 rounded-xl text-[10px] font-black uppercase"
+                >
+                  Undo
+                </button>
+              </div>
             </div>
-          ) : null}
+          </div>
         </section>
       )}
 

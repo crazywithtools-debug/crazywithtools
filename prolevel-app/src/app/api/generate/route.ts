@@ -117,7 +117,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const resolvedKey = (apiKey && apiKey.trim()) || process.env.GEMINI_API_KEY || '';
+  // Accept multiple environment variable names to avoid deployment mismatches.
+  // Some deployments set `GENAI_API_KEY` or expose a public key as
+  // `NEXT_PUBLIC_GENAI_API_KEY`. We prefer a server-side secret `GEMINI_API_KEY`.
+  const resolvedKey =
+    (apiKey && apiKey.trim()) ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GENAI_API_KEY ||
+    process.env.NEXT_PUBLIC_GENAI_API_KEY ||
+    '';
 
   if (!resolvedKey) {
     return NextResponse.json<GenerateErrorBody>(

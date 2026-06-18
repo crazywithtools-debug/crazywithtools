@@ -25,6 +25,7 @@ import { getSessionId } from '@/lib/session';
 import type { ProcessedItem, AddSettings, ReplaceSettings } from '@/types';
 import dynamic from 'next/dynamic';
 import { THEME_COLOR, ACTIVE_COLOR, BUTTON_BG_COLOR, BUTTON_TEXT_COLOR } from '@/lib/utils';
+import RightPanel from '@/components/RightPanel';
 import { error as logError } from '@/lib/logger';
 const AdPlaceholder = dynamic(() => import('@/components/AdPlaceholder'), { ssr: false });
 // OutputSection removed for ProLevel page per UI update request
@@ -2533,225 +2534,24 @@ export default function ProLevelPage() {
             )}
           </div>
 
-          {/* PANEL 3: ADD & REPLACE OPERATORS */}
+          {/* Right-side Add/Replace panel (rendered via RightPanel component) */}
           {(isAddEnabled || isReplaceEnabled) && (
-            <div className="lg:col-span-1 flex flex-col gap-4 duration-300">
-              {isAddEnabled && (
-                <div className="bg-[#121214] border border-white/5 rounded-3xl p-4 flex flex-col gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer select-none group border-b border-white/5 pb-2">
-                    <input
-                      type="checkbox"
-                      checked={isAddEnabled}
-                      onChange={(e) => handleToggleAddEnabled(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/10 bg-black/40 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
-                    />
-                    <h3 className="text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-1.5 group-hover:text-emerald-400 transition-colors">
-                      <Plus size={14} style={{ color: ACTIVE_COLOR }} /> Add Insertion
-                    </h3>
-                  </label>
-
-                  <div className="space-y-3">
-                    <div className="flex flex-col gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Insertion Mode</span>
-                      <div className="grid grid-cols-2 gap-1 bg-black/40 border border-white/10 p-0.5 rounded-2xl">
-                        <button
-                          type="button"
-                          onClick={() => handleSetAddMode('alternative')}
-                          className="py-1 text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer"
-                          style={addSettings.mode === 'alternative' ? { backgroundColor: ACTIVE_COLOR, color: '#000' } : undefined}
-                        >
-                          Alternative
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSetAddMode('sequential')}
-                          className="py-1 text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer"
-                          style={addSettings.mode === 'sequential' ? { backgroundColor: ACTIVE_COLOR, color: '#000' } : undefined}
-                        >
-                          Sequential
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Global interval input for Alternative mode or single-field */}
-                    {(addSettings.mode === 'alternative' || addSettings.numFields === 1) && (
-                      <div className="space-y-2">
-                        <label className="text-[8px] font-bold uppercase tracking-widest text-white/40">Insert Every (N) Words</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={addSettings.baseValues[0] || ''}
-                          onChange={(e) => handleBaseValueChange(0, e.target.value)}
-                          placeholder="e.g. 16"
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs text-white outline-none focus:border-emerald-400 font-bold"
-                        />
-                      </div>
-                    )}
-
-                    <div className="space-y-3 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
-                      {addSettings.contents.map((content, idx) => (
-                        <div key={idx} className="p-3 bg-white/5 border border-white/5 rounded-2xl space-y-2 relative group text-left">
-                          {addSettings.numFields > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveNewField(idx)}
-                              className="absolute top-1.5 right-1.5 p-1 hover:bg-red-500/10 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer"
-                              title="Remove row"
-                            >
-                              <Trash2 size={11} />
-                            </button>
-                          )}
-                          <div style={{ color: ACTIVE_COLOR }} className="text-[9px] font-black uppercase tracking-widest">Entry #{idx + 1}</div>
-
-                          <div className="grid grid-cols-1 gap-1">
-                            {addSettings.mode === 'sequential' && (
-                              <div className="space-y-0.5">
-                                <label className="text-[8px] font-bold uppercase tracking-widest text-white/40">Insert Every (N) Words</label>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  value={addSettings.baseValues[idx] || ''}
-                                  onChange={(e) => handleBaseValueChange(idx, e.target.value)}
-                                  placeholder="e.g. 5"
-                                  className="w-full bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs text-white outline-none focus:border-emerald-400 font-bold"
-                                />
-                              </div>
-                            )}
-
-                            <div className="space-y-0.5">
-                              <label className="text-[8px] font-bold uppercase tracking-widest text-white/40">Text to Insert</label>
-                              <input
-                                type="text"
-                                value={content}
-                                onChange={(e) => handleContentChange(idx, e.target.value)}
-                                placeholder="e.g. [ADDON]"
-                                className="w-full bg-black/40 border border-white/10 rounded-xl px-2 py-1 text-xs text-white outline-none focus:border-emerald-400"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleAddNewField}
-                      className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/15 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1"
-                    >
-                      <Plus size={11} /> Add Field Row
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleApplyAdd}
-                        disabled={!activeItem || addSettings.contents.length === 0}
-                        className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-30 rounded-xl text-[10px] font-black uppercase tracking-widest text-black transition active:scale-[0.98]"
-                      >
-                        Insert Keys on Current
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleUndoActive}
-                        disabled={!activeItem || !undoMap[activeIndex]}
-                        title="Undo last insertion on active item"
-                        className="px-3 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 border border-white/10 rounded-xl text-[10px] font-black uppercase"
-                      >
-                        Undo
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {isReplaceEnabled && (
-                <div className="bg-[#121214] border border-white/5 rounded-3xl p-4 flex flex-col gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer select-none group border-b border-white/5 pb-2">
-                    <input
-                      type="checkbox"
-                      checked={isReplaceEnabled}
-                      onChange={(e) => handleToggleReplaceEnabled(e.target.checked)}
-                      className="w-4 h-4 rounded border-white/10 bg-black/40 text-sky-400 focus:ring-sky-500 cursor-pointer"
-                    />
-                    <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1.5 group-hover:text-sky-300 transition-colors">
-                      <Replace size={14} className="text-[#38bdf8]" /> Find &amp; Replace
-                    </h3>
-                  </label>
-
-                  <div className="space-y-3">
-                    <div className="space-y-3 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
-                      {replaceSettings.finds.map((find, idx) => (
-                        <div key={idx} className="p-3 bg-white/5 border border-white/5 rounded-2xl space-y-1.5 relative group text-left">
-                          {replaceSettings.numFind > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveReplaceRow(idx)}
-                              className="absolute top-1.5 right-1.5 p-1 hover:bg-red-500/10 text-red-400 hover:text-red-300 rounded-lg transition-colors cursor-pointer"
-                              title="Remove row"
-                            >
-                              <Trash2 size={11} />
-                            </button>
-                          )}
-
-                          <div className="text-[9px] font-black uppercase tracking-widest text-sky-400">Replacement #{idx + 1}</div>
-
-                          <div className="space-y-1">
-                            <input
-                              type="text"
-                              value={find}
-                              onChange={(e) => handleFindChange(idx, e.target.value)}
-                              placeholder="Find Text or /regex/i"
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white outline-none focus:border-[#38bdf8] font-mono"
-                            />
-                            <div className="flex justify-center text-white/20 select-none py-0.5">
-                              <ArrowUpDown size={10} />
-                            </div>
-                            <input
-                              type="text"
-                              value={replaceSettings.replaces[idx] || ''}
-                              onChange={(e) => handleReplaceChange(idx, e.target.value)}
-                              placeholder="Replace With"
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white outline-none focus:border-[#38bdf8] font-mono"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleAddReplaceRow}
-                      className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/15 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center justify-center gap-1"
-                    >
-                      <Plus size={11} /> Add Find &amp; Replace Row
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleApplyReplace}
-                        disabled={!activeItem || replaceSettings.finds.every((f) => !f)}
-                        style={{ backgroundColor: BUTTON_BG_COLOR, color: BUTTON_TEXT_COLOR }}
-                        className="flex-1 py-2.5 disabled:opacity-30 rounded-xl text-[10px] font-black uppercase tracking-widest transition active:scale-[0.98]"
-                      >
-                        Replace Matches
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={handleUndoActive}
-                        disabled={!activeItem || !undoMap[activeIndex]}
-                        title="Undo last replacement on active item"
-                        className="px-3 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-40 border border-white/10 rounded-xl text-[10px] font-black uppercase"
-                      >
-                        Undo
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <RightPanel
+              activeTools={{ add: isAddEnabled, replace: isReplaceEnabled }}
+              addSettings={addSettings}
+              onAddSettingsChange={(patch) => setAddSettings((prev) => ({ ...prev, ...(patch as Partial<typeof prev>) }))}
+              replaceSettings={replaceSettings}
+              onReplaceSettingsChange={(patch) => setReplaceSettings((prev) => ({ ...prev, ...(patch as Partial<typeof prev>) }))}
+              isAddEnabled={isAddEnabled}
+              isReplaceEnabled={isReplaceEnabled}
+              onToggleAddEnabled={handleToggleAddEnabled}
+              onToggleReplaceEnabled={handleToggleReplaceEnabled}
+              onAddNewField={handleAddNewField}
+              onRemoveNewField={handleRemoveNewField}
+              onApplyAdd={handleApplyAdd}
+              onUndoActive={handleUndoActive}
+              undoDisabled={!undoMap[activeIndex]}
+            />
           )}
         </div>
 
