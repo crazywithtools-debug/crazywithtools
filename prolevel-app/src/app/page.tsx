@@ -752,24 +752,28 @@ export default function HomePage(): JSX.Element {
 
       <div className="home-layout">
         {/* Left Sidebar */}
-        <Sidebar
-          activeTools={activeTools}
-          onToolToggle={handleToolToggle}
-          onImportClick={handleImportClick}
-          stickyNotes={stickyNotes}
-          onOpenNote={(id) => handleOpenNote(id as string)}
-          onDeleteNote={(id) => handleDeleteNote(id as string)}
-          onRenameNote={(id, title) => handleRenameNote(id as string, title)}
-          onUndoRename={(id) => handleUndoRename(id as string)}
-          onRedoRename={(id) => handleRedoRename(id as string)}
-          onAddNote={handleAddNote}
-          onClearAllNotes={handleClearAllNotes}
-          collapsed={sidebarCollapsed}
-          onMenuToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-        />
+        <div className="home-left">
+          <Sidebar
+            activeTools={activeTools}
+            addMode={addSettings.mode}
+            onToolToggle={handleToolToggle}
+            onImportClick={handleImportClick}
+            stickyNotes={stickyNotes}
+            onOpenNote={(id) => handleOpenNote(id as string)}
+            onDeleteNote={(id) => handleDeleteNote(id as string)}
+            onRenameNote={(id, title) => handleRenameNote(id as string, title)}
+            onUndoRename={(id) => handleUndoRename(id as string)}
+            onRedoRename={(id) => handleRedoRename(id as string)}
+            onAddNote={handleAddNote}
+            onClearAllNotes={handleClearAllNotes}
+            collapsed={sidebarCollapsed}
+            onMenuToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+        </div>
 
         {/* Main Editor */}
-        <div className="home-editor-section">
+        <div className="home-main">
+          <div className="home-editor-section">
           {/* AI Content Section - Above Title (when selected) */}
           {activeTools.ai && (
             <div className="home-ai-section">
@@ -832,16 +836,19 @@ export default function HomePage(): JSX.Element {
             </button>
           </div>
           </div>
+          </div>
         </div>
 
         {/* Right Panel */}
-        <RightPanel
-          activeTools={{ add: activeTools.add, replace: activeTools.replace }}
-          addSettings={addSettings}
-          onAddSettingsChange={handleAddSettingsPatch}
-          replaceSettings={replaceSettings}
-          onReplaceSettingsChange={handleReplaceSettingsPatch}
-        />
+        <div className="home-right">
+          <RightPanel
+            activeTools={{ add: activeTools.add, replace: activeTools.replace }}
+            addSettings={addSettings}
+            onAddSettingsChange={handleAddSettingsPatch}
+            replaceSettings={replaceSettings}
+            onReplaceSettingsChange={handleReplaceSettingsPatch}
+          />
+        </div>
       </div>
 
       {/* Output Section - Below Main Layout */}

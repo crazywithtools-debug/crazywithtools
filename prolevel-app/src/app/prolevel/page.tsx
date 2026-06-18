@@ -40,6 +40,8 @@ export default function ProLevelPage() {
   // States
   const [items, setItems] = useState<ProcessedItem[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+  // track per-item 'selected/active' highlight separate from the active editor index
+  const [selectedItems, setSelectedItems] = useState<Record<number, boolean>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [limitLeft, setLimitLeft] = useState<number>(DEFAULT_DAILY_LIMIT);
@@ -1443,6 +1445,11 @@ export default function ProLevelPage() {
       if (removed <= 0) return flashStatus('No matching successful titles found to remove.', 1800, 'info');
       const nextText = remaining.join('\n');
       setTitlesText(nextText);
+      try {
+        localStorage.setItem('pro_titles_text', nextText);
+      } catch (e) {
+        /* ignore */
+      }
       flashStatus(`${removed} successful title(s) removed from input.`, 2000, 'success');
     } catch (e) {
       logError('Failed to remove successful titles', e);
@@ -2304,6 +2311,7 @@ export default function ProLevelPage() {
             <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto custom-scrollbar">
               {items.map((itm, idx) => {
                 const isActive = idx === activeIndex;
+                const isSelected = !!selectedItems[idx];
                 // Title text color: highlighted when active, neutral otherwise
                 const statusColor = isActive ? 'text-zinc-100' : 'text-zinc-400';
                 // Dot indicates per-item status regardless of active selection
@@ -2321,15 +2329,20 @@ export default function ProLevelPage() {
                     key={itm.id}
                     role="button"
                     tabIndex={0}
-                    onClick={() => setActiveIndex(idx)}
+                    onClick={() => {
+                      setActiveIndex(idx);
+                      // select only this item (single-selection)
+                      setSelectedItems(() => ({ [idx]: true }));
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         setActiveIndex(idx);
+                        setSelectedItems(() => ({ [idx]: true }));
                       }
                     }}
                     className={`w-full text-left p-3 rounded-2xl border transition-all flex items-center gap-2.5 ${
-                      isActive ? 'bg-white/5 border-white/10 shadow-xl' : 'bg-black/20 border-transparent hover:bg-white/[0.02]'
+                      isActive ? 'bg-white/5 border-white/10 shadow-xl' : isSelected ? 'bg-emerald-900/20 border-emerald-500/20' : 'bg-black/20 border-transparent hover:bg-white/[0.02]'
                     }`}
                   >
                     <span className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${indicatorDot}`} />

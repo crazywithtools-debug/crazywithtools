@@ -85,8 +85,13 @@ body {
   flex: 0 0 auto;
 }
 
-/* Left Sidebar - 20% (Fixed, no collapse) */
-.home-layout > :first-child {
+/* ensure columns align to top so fixed main height works cleanly */
+.home-layout {
+  align-items: flex-start;
+}
+
+/* Explicit 3-column containers: left 20%, main 60%, right 20% */
+.home-left {
   width: 20%;
   min-width: 20%;
   max-width: 20%;
@@ -95,8 +100,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Main Editor Section - 60% */
-.home-editor-section {
+.home-main {
   width: 60%;
   min-width: 60%;
   max-width: 60%;
@@ -107,6 +111,11 @@ body {
   padding: 0;
   gap: 0;
 }
+/* Constrain main column height so only its content scrolls */
+.home-main {
+  min-height: 70vh;
+  max-height: 80vh;
+}
 
 /* Title Section - Fixed at top */
 .home-editor-title-section {
@@ -114,6 +123,14 @@ body {
   padding: 1.5rem 2rem;
   border-bottom: 1px solid rgba(74, 222, 128, 0.1);
   overflow: hidden;
+}
+
+/* Keep title visually above the scrolling content area */
+.home-editor-title-section {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: rgba(0,0,0,0.0);
 }
 
 /* Content Scrollable Area */
@@ -127,6 +144,11 @@ body {
   gap: 1.5rem;
 }
 
+/* Ensure smooth native scrolling on iOS */
+.home-editor-content-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
 /* AI Content Section - Above Title */
 .home-ai-section {
   flex-shrink: 0;
@@ -137,7 +159,7 @@ body {
 }
 
 /* Right Panel - 20% */
-.home-layout > :last-child {
+.home-right {
   width: 20%;
   min-width: 20%;
   max-width: 20%;
@@ -243,19 +265,19 @@ body {
     flex-direction: row;
   }
 
-  .home-layout > :first-child {
+  .home-left {
     width: 20%;
     min-width: 20%;
     max-width: 20%;
   }
 
-  .home-editor-section {
-    width: 60%;
-    min-width: 60%;
-    max-width: 60%;
+  .home-main .home-editor-section {
+    width: 100%;
+    min-width: auto;
+    max-width: none;
   }
 
-  .home-layout > :last-child {
+  .home-right {
     width: 20%;
     min-width: 20%;
     max-width: 20%;
@@ -272,20 +294,20 @@ body {
     flex-direction: row;
   }
 
-  .home-layout > :first-child {
+  .home-left {
     width: 20%;
     min-width: 20%;
     max-width: 20%;
   }
 
-  .home-editor-section {
-    width: 60%;
-    min-width: 60%;
-    max-width: 60%;
+  .home-main .home-editor-section {
+    width: 100%;
+    min-width: auto;
+    max-width: none;
     padding: 1rem 1.5rem;
   }
 
-  .home-layout > :last-child {
+  .home-right {
     width: 20%;
     min-width: 20%;
     max-width: 20%;
@@ -303,7 +325,7 @@ body {
     height: auto;
   }
 
-  .home-layout > :first-child {
+  .home-left {
     width: 20%;
     min-width: 20%;
     max-width: 20%;
@@ -311,15 +333,15 @@ body {
     max-height: 600px;
   }
 
-  .home-editor-section {
-    width: 60%;
-    min-width: 60%;
-    max-width: 60%;
+  .home-main .home-editor-section {
+    width: 100%;
+    min-width: auto;
+    max-width: none;
     flex: 1;
     padding: 1rem;
   }
 
-  .home-layout > :last-child {
+  .home-right {
     width: 20%;
     min-width: 20%;
     max-width: 20%;
@@ -339,20 +361,20 @@ body {
     height: auto;
   }
 
-  .home-layout > :first-child {
+  .home-left {
     width: 100%;
     height: auto;
     max-height: 300px;
     overflow-y: auto;
   }
 
-  .home-editor-section {
+  .home-main .home-editor-section {
     width: 100%;
     padding: 0.75rem;
     gap: 1rem;
   }
 
-  .home-layout > :last-child {
+  .home-right {
     width: 100%;
     height: auto;
     max-height: 300px;

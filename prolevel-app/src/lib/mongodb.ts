@@ -16,6 +16,7 @@ declare global {
 }
 
 let clientPromise: Promise<MongoClient> | undefined;
+let _mongoGuidanceLogged = false;
 
 function buildMongoOptions() {
   const serverSelectionTimeoutMS = Number(process.env.MONGODB_SERVER_SELECTION_TIMEOUT_MS || 5000);
@@ -65,11 +66,15 @@ export async function getDb(): Promise<Db> {
   } catch (err) {
     // provide helpful guidance for common DNS SRV errors (mongodb+srv)
     const message = err instanceof Error ? err.message : String(err);
-    if (message.toLowerCase().includes('querysrv') || message.toLowerCase().includes('querysrv') || message.toLowerCase().includes('srv')) {
-      logError('MongoDB SRV (DNS) lookup failed. If using mongodb+srv://, ensure your environment allows DNS SRV lookups and that the URI is correct.');
-    }
-    if (message.includes('ECONNREFUSED') || message.includes('ENOTFOUND')) {
-      logError('MongoDB connection refused or host not found. Check MONGODB_URI, network access, and firewall/DNS settings.');
+    // Log guidance only once to avoid spamming dev logs on repeated client requests
+    if (!_mongoGuidanceLogged) {
+      _mongoGuidanceLogged = true;
+      if (message.toLowerCase().includes('querysrv') || message.toLowerCase().includes('srv')) {
+        logError('MongoDB SRV (DNS) lookup failed. If using mongodb+srv://, ensure your environment allows DNS SRV lookups and that the URI is correct.');
+      }
+      if (message.includes('ECONNREFUSED') || message.includes('ENOTFOUND')) {
+        logError('MongoDB connection refused or host not found. Check MONGODB_URI, network access, and firewall/DNS settings.');
+      }
     }
     throw err;
   }

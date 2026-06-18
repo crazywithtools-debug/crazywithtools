@@ -88,26 +88,34 @@ const RightPanel: FC<RightPanelProps> = ({
 
           {addSettings.numFields > 1 && (
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase opacity-40" style={{ color: THEME_COLOR }}>
-                Insertion Mode
-              </label>
-              <div className="relative">
-                <select
-                  value={addSettings.mode}
-                  onChange={(e) => onAddSettingsChange({ mode: e.target.value as AddSettings['mode'] })}
-                  className="w-full appearance-none bg-white/5 border rounded-xl px-4 py-2 text-sm outline-none cursor-pointer"
-                  style={{ color: TEXT_COLOR, borderColor: themeColorMix(90) }}
-                >
-                  <option value="alternative" className="bg-zinc-900">
+                <label className="text-[10px] font-bold uppercase opacity-40" style={{ color: THEME_COLOR }}>
+                  Insertion Mode
+                </label>
+                <div className="grid grid-cols-2 gap-1 bg-white/5 border rounded-2xl p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => onAddSettingsChange({ mode: 'alternative' })}
+                    className="py-1 text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer"
+                    aria-pressed={addSettings.mode === 'alternative'}
+                    title={addSettings.mode === 'alternative' ? 'Active insertion mode: Alternative' : 'Set insertion mode: Alternative'}
+                    aria-label={addSettings.mode === 'alternative' ? 'Active insertion mode Alternative' : 'Set insertion mode Alternative'}
+                    style={addSettings.mode === 'alternative' ? { backgroundColor: ACTIVE_COLOR, color: '#000' } : undefined}
+                  >
                     Alternative
-                  </option>
-                  <option value="sequential" className="bg-zinc-900">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onAddSettingsChange({ mode: 'sequential' })}
+                    className="py-1 text-[9px] font-bold uppercase tracking-widest rounded-xl transition-all cursor-pointer"
+                    aria-pressed={addSettings.mode === 'sequential'}
+                    title={addSettings.mode === 'sequential' ? 'Active insertion mode: Sequential' : 'Set insertion mode: Sequential'}
+                    aria-label={addSettings.mode === 'sequential' ? 'Active insertion mode Sequential' : 'Set insertion mode Sequential'}
+                    style={addSettings.mode === 'sequential' ? { backgroundColor: ACTIVE_COLOR, color: '#000' } : undefined}
+                  >
                     Sequential
-                  </option>
-                </select>
-                <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40" style={{ color: THEME_COLOR }} />
+                  </button>
+                </div>
               </div>
-            </div>
           )}
 
           {/* Show interval controls depending on insertion mode:

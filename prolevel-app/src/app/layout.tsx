@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: SITE_URL,
     siteName: 'Crazy With Tools',
-    title: 'Crazy With Tools | AI-Powered PDF Editor & Content Generator',
+    title: 'Crazy With Tools',
     description: 'AI-powered PDF editing, content generation, and document management in one platform.',
     images: [
       {

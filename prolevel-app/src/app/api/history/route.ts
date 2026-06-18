@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { error as logError } from '@/lib/logger';
+import { error as logError, warn as logWarn } from '@/lib/logger';
 import { getDb } from '@/lib/mongodb';
 import type { ProcessedItem } from '@/types';
 
@@ -12,6 +12,9 @@ interface HistoryDoc {
 
 const COLLECTION = 'pro_level_history';
 
+// In-memory fallback storage when the database is not available.
+const inMemoryHistory = new Map<string, { items: ProcessedItem[]; customPrompt: string; updatedAt: string }>();
+
 // GET /api/history?sessionId=xxxx
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId');
@@ -20,29 +23,33 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'sessionId query param is required.' }, { status: 400 });
   }
 
-  // If DB is not configured, fail fast with useful guidance.
-  if (!process.env.MONGODB_URI) {
-    return NextResponse.json(
-      { error: 'Database is not configured. Set MONGODB_URI in environment.' },
-      { status: 503 }
-    );
-  }
-
+  // Try DB first when configured; otherwise fall back to in-memory store.
   try {
-    const db = await getDb();
-    const doc = await db.collection<HistoryDoc>(COLLECTION).findOne({ sessionId });
+    if (process.env.MONGODB_URI) {
+      try {
+        const db = await getDb();
+        const doc = await db.collection<HistoryDoc>(COLLECTION).findOne({ sessionId });
 
+        if (doc) {
+          return NextResponse.json({ items: doc.items, customPrompt: doc.customPrompt });
+        }
+        // no DB doc -> fall through to in-memory fallback
+      } catch (err) {
+        logError('[history GET] DB error, falling back to in-memory store:', err instanceof Error ? err.message : err);
+      }
+    } else {
+      logWarn('MONGODB_URI not set; using in-memory history fallback.');
+    }
+
+    const doc = inMemoryHistory.get(sessionId!);
     if (!doc) {
       return NextResponse.json({ items: [], customPrompt: null });
     }
 
     return NextResponse.json({ items: doc.items, customPrompt: doc.customPrompt });
   } catch (err) {
-    logError('[history GET] error:', err);
-    return NextResponse.json(
-      { error: 'Failed to load history. Database may not be configured.' },
-      { status: 500 }
-    );
+    logError('[history GET] unexpected error:', err);
+    return NextResponse.json({ error: 'Failed to load history.' }, { status: 500 });
   }
 }
 
@@ -62,34 +69,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'sessionId is required.' }, { status: 400 });
   }
 
-  if (!process.env.MONGODB_URI) {
-    return NextResponse.json(
-      { error: 'Database is not configured. Set MONGODB_URI in environment.' },
-      { status: 503 }
-    );
-  }
-
+  // Try to persist to DB when available; otherwise store in-memory as a graceful fallback.
   try {
-    const db = await getDb();
-    await db.collection<HistoryDoc>(COLLECTION).updateOne(
-      { sessionId },
-      {
-        $set: {
-          sessionId,
-          items: items || [],
-          customPrompt: customPrompt || '',
-          updatedAt: new Date(),
-        },
-      },
-      { upsert: true }
-    );
+    if (process.env.MONGODB_URI) {
+      try {
+        const db = await getDb();
+        await db.collection<HistoryDoc>(COLLECTION).updateOne(
+          { sessionId },
+          {
+            $set: {
+              sessionId,
+              items: items || [],
+              customPrompt: customPrompt || '',
+              updatedAt: new Date(),
+            },
+          },
+          { upsert: true }
+        );
 
-    return NextResponse.json({ ok: true });
+        return NextResponse.json({ ok: true });
+      } catch (err) {
+        logError('[history POST] DB error, falling back to in-memory store:', err instanceof Error ? err.message : err);
+      }
+    } else {
+      logWarn('MONGODB_URI not set; saving history to in-memory fallback.');
+    }
+
+    // In-memory fallback
+    inMemoryHistory.set(sessionId, {
+      items: items || [],
+      customPrompt: customPrompt || '',
+      updatedAt: new Date().toISOString(),
+    });
+
+    return NextResponse.json({ ok: true, fallback: true });
   } catch (err) {
-    logError('[history POST] error:', err);
-    return NextResponse.json(
-      { error: 'Failed to save history. Database may not be configured.' },
-      { status: 500 }
-    );
+    logError('[history POST] unexpected error:', err);
+    return NextResponse.json({ error: 'Failed to save history.' }, { status: 500 });
   }
 }

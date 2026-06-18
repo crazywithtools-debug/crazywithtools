@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { cn, themeColorMix, THEME_COLOR, ACTIVE_COLOR } from '@/lib/utils';
-import type { StickyNote as StickyNoteType } from '@/types';
+import type { StickyNote as StickyNoteType, AddSettings } from '@/types';
 
 interface SidebarProps {
   activeTools?: {
@@ -26,6 +26,9 @@ interface SidebarProps {
     aiContent?: boolean;
     stickyNotes?: boolean;
   };
+  // Optional: provide the current Add insertion mode to allow the sidebar to reflect
+  // that the Add feature is active when insertion mode is selected (alternative/sequential).
+  addMode?: AddSettings['mode'];
   onToolToggle?: (tool: string) => void;
   onImportClick?: () => void;
   stickyNotes?: StickyNoteType[];
@@ -43,6 +46,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTools = {},
+  addMode,
   onToolToggle,
   onImportClick,
   stickyNotes = [],
@@ -90,7 +94,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <ToolItem
           icon={<Plus size={16} />}
           label="Add"
-          active={!!activeTools.add}
+          active={addMode === 'alternative' || addMode === 'sequential'}
+          tooltip={addMode ? `Insertion mode: ${addMode}` : 'Insertion mode: off'}
           onClick={() => onToolToggle && onToolToggle('add')}
           collapsed={collapsed}
         />
@@ -219,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
 export default memo(Sidebar);
 
-const ToolItem: FC<{ icon: ReactNode; label: string; active?: boolean; onClick?: () => void; collapsed?: boolean }> = ({ icon, label, active, onClick, collapsed }) => (
+const ToolItem: FC<{ icon: ReactNode; label: string; active?: boolean; onClick?: () => void; collapsed?: boolean; tooltip?: string }> = ({ icon, label, active, onClick, collapsed, tooltip }) => (
   <button
     onClick={onClick}
     className={cn(
@@ -228,7 +233,7 @@ const ToolItem: FC<{ icon: ReactNode; label: string; active?: boolean; onClick?:
       active ? 'bg-gradient-to-r from-blue-500/20 to-transparent' : 'hover:bg-white/5'
     )}
     style={{ color: active ? ACTIVE_COLOR : THEME_COLOR, opacity: active ? 1 : 0.6 }}
-    title={collapsed ? label : undefined}
+    title={tooltip ?? (collapsed ? label : undefined)}
   >
     <div className={cn('shrink-0 transition-transform group-active:scale-90')} style={{ color: active ? ACTIVE_COLOR : THEME_COLOR }}>
       {icon}
