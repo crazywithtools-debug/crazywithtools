@@ -4,7 +4,7 @@ import type { ProcessedItem } from '@/types';
 
 // Lightweight in-memory history store. This keeps the API working even when
 // no external database is configured and avoids introducing an unused
-// MongoDB dependency.
+// external DB dependency.
 const inMemoryHistory = new Map<string, { items: ProcessedItem[]; customPrompt: string; updatedAt: string }>();
 
 // GET /api/history?sessionId=xxxx

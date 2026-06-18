@@ -11,6 +11,7 @@ A professional AI-powered content editor and PDF generator built with Next.js, T
 - 📌 Sticky notes for task management
 - 📱 Fully responsive design
 - 🔄 Content history tracking with MongoDB
+ - 🔄 Content history tracking (in-memory by default)
 - ⚡ Fast performance with Next.js 16 and Turbopack
 
 ## Stack
@@ -18,7 +19,7 @@ A professional AI-powered content editor and PDF generator built with Next.js, T
 - **Frontend**: Next.js 16.2.9 + React 18.3 + TypeScript 5.6
 - **Styling**: Tailwind CSS 3.4 + custom CSS
 - **AI**: Google Gemini API (`@google/genai`)
-- **Database**: MongoDB (optional for history sync)
+- **Database**: In-memory by default (optional persistent storage can be configured)
 - **PDF Export**: jsPDF + html2canvas
 - **UI Components**: Lucide React icons
 - **Deployment**: Vercel
@@ -35,9 +36,8 @@ cp .env.local.example .env.local
 
 2. Configure `.env.local`:
 ```
-NEXT_PUBLIC_MONGODB_URI=mongodb://your-connection-string
-MONGODB_URI=mongodb://your-connection-string
 NEXT_PUBLIC_GENAI_API_KEY=your-gemini-api-key
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 3. Run development server:
@@ -59,9 +59,9 @@ npm start
 This project is optimized for Vercel deployment:
 
 1. **Environment Variables**: Set in Vercel dashboard:
-   - `NEXT_PUBLIC_MONGODB_URI` - MongoDB connection string
-   - `MONGODB_URI` - MongoDB connection string
    - `NEXT_PUBLIC_GENAI_API_KEY` - Google Gemini API key
+   - `GENAI_API_KEY` - Optional server-side Gemini key
+   - `GEMINI_API_KEY` - Preferred server-side Gemini key
 
 2. **Deploy**:
    - Connect your GitHub repository to Vercel
@@ -77,7 +77,7 @@ src/
 ├── app/
 │   ├── api/
 │   │   ├── generate/route.ts      - AI content generation
-│   │   └── history/route.ts       - History management
+│   │   └── history/route.ts       - In-memory history management
 │   ├── about/page.tsx             - About page
 │   ├── customize/page.tsx         - UI customization
 │   ├── privacy/page.tsx           - Privacy policy
@@ -94,7 +94,6 @@ src/
 │   └── ...
 ├── lib/
 │   ├── text-processor.ts          - Text operations
-│   ├── mongodb.ts                 - DB connection
 │   ├── session.ts                 - Session management
 │   └── utils.ts                   - Helper utilities
 └── types/

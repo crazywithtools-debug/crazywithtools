@@ -236,9 +236,8 @@ After:
 1. Connect GitHub repository to Vercel
 2. Set environment variables in Vercel dashboard:
    - NEXT_PUBLIC_GENAI_API_KEY
-   - NEXT_PUBLIC_MONGODB_URI
-   - MONGODB_URI
-   - MONGODB_DB_NAME
+   - GENAI_API_KEY (optional server-side)
+   - GEMINI_API_KEY (preferred server-side)
 3. Push to main branch or click Deploy
 4. Verify deployment
 
@@ -328,12 +327,11 @@ After:
    - Select your repository
 
 2. **Set Environment Variables**
-   - Project Settings → Environment Variables
-   - Add required variables:
-     - `NEXT_PUBLIC_GENAI_API_KEY`
-     - `NEXT_PUBLIC_MONGODB_URI`
-     - `MONGODB_URI`
-     - `MONGODB_DB_NAME`
+    - Project Settings → Environment Variables
+    - Add required variables:
+       - `NEXT_PUBLIC_GENAI_API_KEY`
+       - `GENAI_API_KEY` (optional server-side)
+       - `GEMINI_API_KEY` (preferred server-side)
 
 3. **Deploy**
    - Click "Deploy" or push to main branch
@@ -367,10 +365,10 @@ npm run dev
 
 ### Overall Status: ✅ **PRODUCTION READY**
 
-**Component Status**:
+- **Component Status**:
 - ✅ Frontend: Ready for deployment
 - ✅ API Routes: Ready for deployment
-- ✅ Database Layer: Ready (optional MongoDB)
+- ✅ Database Layer: Ready (in-memory history)
 - ✅ Configuration: Ready for Vercel
 - ✅ Documentation: Complete
 - ✅ Security: Hardened and verified
@@ -407,7 +405,6 @@ npm run dev
 - Next.js Docs: https://nextjs.org/docs
 - Vercel Docs: https://vercel.com/docs
 - Gemini API: https://ai.google.dev/docs
-- MongoDB: https://www.mongodb.com/docs
 
 ---
 

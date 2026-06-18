@@ -104,9 +104,6 @@ const PROJECTS = [
 # Removed exposed credentials
 # Added proper template with comments
 NEXT_PUBLIC_GENAI_API_KEY=your_gemini_api_key_here
-NEXT_PUBLIC_MONGODB_URI=mongodb://localhost:27017
-MONGODB_URI=mongodb://localhost:27017
-MONGODB_DB_NAME=prolevel
 NODE_ENV=development
 ```
 
@@ -205,7 +202,7 @@ NODE_ENV=development
 - 📝 Add/Replace text operations
 - 📌 Sticky notes management
 - 📱 Responsive design (20%-60%-20% layout)
-- 🔄 Content history (optional MongoDB)
+- 🔄 Content history (in-memory by default)
 
 ### Deployment Features
 - ⚡ Vercel-optimized Next.js 16
@@ -244,9 +241,8 @@ NODE_ENV=development
 ### 2. Set Environment Variables (5 minutes)
 In Vercel Dashboard → Project Settings → Environment Variables:
 - `NEXT_PUBLIC_GENAI_API_KEY` = Your Gemini API key
-- `NEXT_PUBLIC_MONGODB_URI` = MongoDB connection string
-- `MONGODB_URI` = MongoDB connection string
-- `MONGODB_DB_NAME` = prolevel
+- `GENAI_API_KEY` = Your Gemini API key (optional server-side)
+- `GEMINI_API_KEY` = Your Gemini API key (preferred server-side)
 
 ### 3. Deploy (1-2 minutes)
 ```bash
@@ -276,7 +272,7 @@ production-ready-app/
 │   ├── app/
 │   │   ├── api/
 │   │   │   ├── generate/route.ts    ✅ Gemini API
-│   │   │   └── history/route.ts     ✅ MongoDB
+│   │   │   └── history/route.ts     ✅ in-memory history
 │   │   ├── about/page.tsx           ✨ UPDATED
 │   │   ├── customize/page.tsx       ✅ Ready
 │   │   ├── privacy/page.tsx         ✅ Ready
