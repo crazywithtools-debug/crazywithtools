@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest"
+    "test": "vitest",
+    "postinstall": "npx playwright install --with-deps || true"
   },
   "dependencies": {
     "@google/genai": "^0.3.0",
