@@ -2286,15 +2286,25 @@ export default function ProLevelPage() {
               const pdfHeight = doc.internal.pageSize.getHeight();
               const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
+              // To avoid characters being visually cut between PDF pages when
+              // slicing a long raster image, add a small overlap between
+              // consecutive page slices and round positions to integer values.
+              const overlapPx = 8; // overlap in canvas pixels
+              const scalePdfPerPx = imgProps.width ? pdfWidth / imgProps.width : 1;
+              const overlapPdf = overlapPx * scalePdfPerPx;
+
               let heightLeft = imgHeight;
               let position = 0;
-              doc.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
-              heightLeft -= pdfHeight;
-              while (heightLeft > 0) {
-                position -= pdfHeight;
+              doc.addImage(imgData, "PNG", 0, Math.round(position), pdfWidth, imgHeight);
+              // subtract one page height minus overlap so next slice overlaps slightly
+              heightLeft -= pdfHeight - overlapPdf;
+              let loops = 0;
+              while (heightLeft > 0 && loops < 2000) {
+                position -= pdfHeight - overlapPdf;
                 doc.addPage();
-                doc.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
-                heightLeft -= pdfHeight;
+                doc.addImage(imgData, "PNG", 0, Math.round(position), pdfWidth, imgHeight);
+                heightLeft -= pdfHeight - overlapPdf;
+                loops += 1;
               }
 
               const fileBase = computeFileBaseFromTitle(
@@ -2557,25 +2567,31 @@ export default function ProLevelPage() {
           const pdfHeight = doc.internal.pageSize.getHeight();
           const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-          let heightLeft = imgHeight;
-          let position = 0;
-          doc.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
-          heightLeft -= pdfHeight;
+          // To avoid cutting characters between pages, add a small overlap
+          // and round positions to integer values to prevent fractional-pixel
+          // rendering artifacts that can split glyphs across pages.
+          const overlapPx = 12; // canvas pixels to overlap between pages
+          const scalePdfPerPx = imgProps.width ? pdfWidth / imgProps.width : 1;
+          const overlapPdf = overlapPx * scalePdfPerPx;
 
-          while (heightLeft > 0) {
-            position -= pdfHeight;
+          let heightLeft = Math.round(imgHeight);
+          let position = 0;
+          const imgHeightRounded = Math.round(imgHeight);
+          doc.addImage(imgData, "PNG", 0, Math.round(position), pdfWidth, imgHeightRounded);
+          // subtract one page height minus overlap so next slice overlaps slightly
+          heightLeft -= pdfHeight - overlapPdf;
+          let loops = 0;
+          while (heightLeft > 0 && loops < 2000) {
+            position -= pdfHeight - overlapPdf;
             doc.addPage();
-            doc.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
-            heightLeft -= pdfHeight;
+            doc.addImage(imgData, "PNG", 0, Math.round(position), pdfWidth, imgHeightRounded);
+            heightLeft -= pdfHeight - overlapPdf;
+            loops += 1;
           }
 
           const cleanFileName = computeFileBaseFromTitle(itm.title, idx);
           doc.save(`${cleanFileName}.pdf`);
-          flashStatus(
-            "✓ PDF downloaded with formatted content.",
-            1800,
-            "success",
-          );
+          flashStatus("✓ PDF downloaded with formatted content.", 1800, "success");
         }
       } catch (e) {
         usedHtml2Canvas = false;
