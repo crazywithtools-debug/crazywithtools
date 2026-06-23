@@ -310,6 +310,23 @@ export async function POST(req: Request) {
     } catch (e) {
       // ignore readiness errors
     }
+    // Log pdf-container text length to help diagnose blank PDFs in serverless
+    try {
+      let _pdfContainerTextLen = 0;
+      try {
+        const _txt = await page.evaluate(() => {
+          const el = document.querySelector('.pdf-container');
+          return el ? (el.textContent || '') : '';
+        });
+        if (typeof _txt === 'string') _pdfContainerTextLen = _txt.trim().length;
+      } catch (e) {
+        // ignore inner evaluate errors
+      }
+      // eslint-disable-next-line no-console
+      console.log('[generate-pdf] pdf-container text length=', _pdfContainerTextLen);
+    } catch (e) {
+      // ignore logging failures
+    }
     // Ensure backgrounds don't embed huge images when optimize is enabled.
     // (This is deterministic vs relying only on sharp-string replacements.)
     if (optimize) {
